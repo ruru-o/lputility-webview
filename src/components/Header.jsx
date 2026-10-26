@@ -20,10 +20,7 @@ export function Header({
 
         <div className="header-brand" onClick={() => onQuickNavigate('bufferbloat')}>
           <div className="header-logo">LP</div>
-          <div className="header-brand-info">
-            <span className="header-title">LPUtility</span>
-            <span className="header-subtag">Network Benchmark</span>
-          </div>
+          <span className="header-title">LPUtility</span>
         </div>
       </div>
 
