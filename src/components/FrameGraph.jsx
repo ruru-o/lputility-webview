@@ -13,6 +13,50 @@ function hashString(str) {
 }
 
 /**
+ * Adaptive Domain Calibration:
+ * Ensures baseline sits at ~40-60% height and spikes reach ~75-85%,
+ * completely eliminating squished/stretched floor distortion and unnatural boundaries.
+ */
+function getScaleDomain(target, currentMax = 0) {
+  let yBottom = 0;
+  let yTop = 500;
+  let gridSteps = [100, 150, 200, 250, 300];
+
+  if (target <= 40) {
+    yBottom = 0;
+    yTop = 60;
+    gridSteps = [15, 30, 45, 60];
+  } else if (target <= 80) {
+    // e.g. Cloudflare Speedtest / Google DoH baseline (45-75ms)
+    // 55-60ms baseline sits at ~55-60% height, spikes reach ~80%
+    yBottom = 0;
+    yTop = 100;
+    gridSteps = [25, 50, 75, 100];
+  } else if (target <= 140) {
+    // e.g. 90-125ms
+    yBottom = 40;
+    yTop = 160;
+    gridSteps = [40, 70, 100, 130, 160];
+  } else if (target <= 230) {
+    // Standard Image 2 scale: 100 - 300 ms!
+    yBottom = 100;
+    yTop = 300;
+    gridSteps = [100, 150, 200, 250, 300];
+  } else if (target <= 380) {
+    yBottom = 150;
+    yTop = 450;
+    gridSteps = [150, 225, 300, 375, 450];
+  } else {
+    // High RTT (e.g. 450ms)
+    yBottom = 200;
+    yTop = Math.max(600, Math.ceil(currentMax * 1.15 / 50) * 50);
+    gridSteps = [200, 300, 400, 500, yTop];
+  }
+
+  return { yBottom, yTop, gridSteps };
+}
+
+/**
  * High-performance real-time Frame Graph component
  * Renders an oscilloscope-style latency/frametime curve updating every 5ms
  * Inspired by modern telemetry / system metrics dashboards (Image 2).
@@ -40,7 +84,7 @@ export function FrameGraph({
   const timerIdRef = useRef(null);
   const tickRef = useRef(0);
   const isDirtyRef = useRef(true);
-  const [dimensions, setDimensions] = useState({ width: 600, height });
+  const dimensionsRef = useRef({ width: 600, height: isMini ? 52 : height });
   const [hoverInfo, setHoverInfo] = useState(null);
 
   // Keep refs in sync with incoming props
@@ -58,11 +102,11 @@ export function FrameGraph({
     if (!containerRef.current) return;
     const updateSize = () => {
       if (containerRef.current) {
-        const { clientWidth } = containerRef.current;
-        setDimensions({
+        const { clientWidth, clientHeight } = containerRef.current;
+        dimensionsRef.current = {
           width: Math.max(isMini ? 120 : 320, clientWidth),
-          height: isMini ? 52 : height,
-        });
+          height: isMini ? 52 : (clientHeight || height),
+        };
         isDirtyRef.current = true;
       }
     };
@@ -184,14 +228,23 @@ export function FrameGraph({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.round(rect.width) || dimensionsRef.current.width || 600;
+    const h = Math.round(rect.height) || (isMini ? 52 : height);
+    if (w <= 0 || h <= 0) return;
+
+    dimensionsRef.current = { width: w, height: h };
+
     const dpr = window.devicePixelRatio || 1;
-    const w = dimensions.width;
-    const h = dimensions.height;
+    const targetWidth = Math.round(w * dpr);
+    const targetHeight = Math.round(h * dpr);
 
-    canvas.width = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    ctx.scale(dpr, dpr);
+    if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+    }
 
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
     const points = pointsRef.current;
@@ -207,9 +260,6 @@ export function FrameGraph({
     const plotW = w - padLeft - padRight;
     const plotH = h - padTop - padBottom;
 
-    // Adaptive Domain Calibration:
-    // Ensures baseline sits at ~30-40% height and spikes reach ~75-85%,
-    // eliminating squished/stretched floor distortion!
     let yBottom = 0;
     let yTop = 500;
     let gridSteps = [100, 150, 200, 250, 300];
@@ -222,32 +272,10 @@ export function FrameGraph({
     } else {
       const target = targetLatencyRef.current || 152;
       const currentMax = Math.max(...points);
-
-      if (target <= 50) {
-        yBottom = 0;
-        yTop = 50;
-        gridSteps = [10, 20, 30, 40, 50];
-      } else if (target <= 125) {
-        // e.g. Cloudflare CDN (95 - 105ms):
-        // 100ms baseline sits comfortably at 38% height, spikes reach 75%!
-        yBottom = 50;
-        yTop = 175;
-        gridSteps = [50, 75, 100, 125, 150, 175];
-      } else if (target <= 230) {
-        // Standard Image 2 scale: 100 - 300 ms!
-        yBottom = 100;
-        yTop = 300;
-        gridSteps = [100, 150, 200, 250, 300];
-      } else if (target <= 380) {
-        yBottom = 150;
-        yTop = 450;
-        gridSteps = [150, 225, 300, 375, 450];
-      } else {
-        // High RTT (e.g. 450ms)
-        yBottom = 200;
-        yTop = Math.max(600, Math.ceil(currentMax * 1.15 / 50) * 50);
-        gridSteps = [200, 300, 400, 500, yTop];
-      }
+      const domain = getScaleDomain(target, currentMax);
+      yBottom = domain.yBottom;
+      yTop = domain.yTop;
+      gridSteps = domain.gridSteps;
     }
 
     const yRange = Math.max(30, yTop - yBottom);
@@ -389,10 +417,12 @@ export function FrameGraph({
     if (isMini || !interactive || !canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
+    const currentW = Math.round(rect.width) || dimensionsRef.current.width || 600;
+    const currentH = Math.round(rect.height) || (isMini ? 52 : height);
 
     const padLeft = 20;
     const padRight = 54;
-    const plotW = dimensions.width - padLeft - padRight;
+    const plotW = currentW - padLeft - padRight;
     const points = pointsRef.current;
 
     if (mouseX >= padLeft && mouseX <= padLeft + plotW && points.length > 0) {
@@ -404,20 +434,16 @@ export function FrameGraph({
       const ptX = padLeft + (index / (points.length - 1)) * plotW;
       
       const target = targetLatencyRef.current || 152;
-      let yBottom = 0;
-      let yTop = 500;
-      if (target <= 50) { yBottom = 0; yTop = 50; }
-      else if (target <= 125) { yBottom = 50; yTop = 175; }
-      else if (target <= 230) { yBottom = 100; yTop = 300; }
-      else if (target <= 380) { yBottom = 150; yTop = 450; }
-      else { yBottom = 200; yTop = Math.max(600, Math.ceil(Math.max(...points) * 1.15 / 50) * 50); }
+      const domain = getScaleDomain(target, Math.max(...points));
+      const yBottom = domain.yBottom;
+      const yTop = domain.yTop;
 
       const yRange = Math.max(30, yTop - yBottom);
       const normalized = (val - yBottom) / yRange;
       const clamped = Math.max(0, Math.min(1.05, normalized));
       const padTop = 20;
       const padBottom = 34;
-      const plotH = dimensions.height - padTop - padBottom;
+      const plotH = currentH - padTop - padBottom;
       const ptY = padTop + (plotH * (1 - clamped));
 
       const timeStr = getTooltipTimestamp(timeRange, index, points.length);
@@ -474,7 +500,7 @@ export function FrameGraph({
           className="graph-floating-tooltip"
           style={{
             position: 'absolute',
-            left: `${Math.min(Math.max(70, hoverInfo.x), dimensions.width - 70)}px`,
+            left: `${Math.min(Math.max(70, hoverInfo.x), (dimensionsRef.current.width || 600) - 70)}px`,
             top: `${Math.max(30, hoverInfo.y - 12)}px`,
             transform: 'translate(-50%, -100%)',
             pointerEvents: 'none',
