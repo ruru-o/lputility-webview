@@ -32,7 +32,7 @@ export function ApiHealthWorkspace() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [probingId, setProbingId] = useState(null);
-  const [selectedApiId, setSelectedApiId] = useState('cloudflare-cdn');
+  const [selectedApiId, setSelectedApiId] = useState('cloudflare-latency');
   const [timeRange, setTimeRange] = useState('Day');
   const [liveFrametime, setLiveFrametime] = useState(103);
   const [hoveredPoint, setHoveredPoint] = useState(null);

@@ -236,11 +236,6 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
               <Play size={18} fill="currentColor" />
               <span>Start Test</span>
             </button>
-
-            <div className="wf-server-pill">
-              <span className="server-dot" />
-              <span>Target: Cloudflare Anycast CDN (Multi-Stream)</span>
-            </div>
           </div>
         )}
 

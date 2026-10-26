@@ -46,33 +46,24 @@ server.listen(5188, async () => {
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 1100, deviceScaleFactor: 2 });
 
-    // 1. IPv4 Suite - scrolled to VLSM
-    console.log('Navigating to IPv4...');
+    // 1. Bufferbloat Initial (Verifying removal of "Target: Cloudflare Anycast CDN")
+    console.log('Navigating to Bufferbloat initial view...');
     await page.goto('http://localhost:5188', { waitUntil: 'networkidle0' });
-    await page.evaluate(() => {
-      const items = Array.from(document.querySelectorAll('.nav-item-btn'));
-      const ipv4Btn = items.find(el => el.textContent.includes('IPv4'));
-      if (ipv4Btn) ipv4Btn.click();
-    });
     await new Promise(r => setTimeout(r, 600));
-    await page.evaluate(() => {
-      const el = document.querySelector('.main-content');
-      if (el) el.scrollTop = 450;
-    });
-    await new Promise(r => setTimeout(r, 400));
-    await page.screenshot({ path: path.join(ARTIFACT_DIR, 'ipv4_vlsm_detail.png') });
-    console.log('Saved ipv4_vlsm_detail.png');
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, 'bufferbloat_initial_notarget.png') });
+    console.log('Saved bufferbloat_initial_notarget.png');
 
-    // 2. IPv6 Suite
-    console.log('Navigating to IPv6...');
+    // 2. API Status (Verifying 6 optimal low-latency endpoints)
+    console.log('Navigating to API Status...');
     await page.evaluate(() => {
       const items = Array.from(document.querySelectorAll('.nav-item-btn'));
-      const ipv6Btn = items.find(el => el.textContent.includes('IPv6'));
-      if (ipv6Btn) ipv6Btn.click();
+      const apiBtn = items.find(el => el.textContent.includes('API Status'));
+      if (apiBtn) apiBtn.click();
     });
-    await new Promise(r => setTimeout(r, 600));
-    await page.screenshot({ path: path.join(ARTIFACT_DIR, 'ipv6_revamped.png') });
-    console.log('Saved ipv6_revamped.png');
+    // Wait for the probes to settle
+    await new Promise(r => setTimeout(r, 2000));
+    await page.screenshot({ path: path.join(ARTIFACT_DIR, 'api_optimal_endpoints.png') });
+    console.log('Saved api_optimal_endpoints.png');
 
     // 3. Bufferbloat Workspace with Result & Router Guide Scrolled
     console.log('Navigating to Bufferbloat...');
