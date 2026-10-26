@@ -1,10 +1,11 @@
 import React from 'react';
-import { Menu, X, Gauge } from 'lucide-react';
+import { Menu, X, Play, Gauge } from 'lucide-react';
 
 export function Header({ 
   onToggleMobileMenu, 
   isMobileMenuOpen, 
-  onQuickNavigate 
+  onQuickNavigate,
+  activeTab 
 }) {
   return (
     <header className="winui-header">
@@ -19,18 +20,23 @@ export function Header({
 
         <div className="header-brand" onClick={() => onQuickNavigate('bufferbloat')}>
           <div className="header-logo">LP</div>
-          <span className="header-title">LPUtility</span>
+          <div className="header-brand-info">
+            <span className="header-title">LPUtility</span>
+            <span className="header-subtag">Network Benchmark</span>
+          </div>
         </div>
       </div>
 
       <div className="header-right">
-        <button 
-          className="header-action-btn"
-          onClick={() => onQuickNavigate('bufferbloat')}
-        >
-          <Gauge size={14} />
-          <span>Bufferbloat Test</span>
-        </button>
+        {activeTab !== 'bufferbloat' && (
+          <button 
+            className="header-action-btn"
+            onClick={() => onQuickNavigate('bufferbloat')}
+          >
+            <Gauge size={14} />
+            <span>Bufferbloat Test</span>
+          </button>
+        )}
       </div>
     </header>
   );

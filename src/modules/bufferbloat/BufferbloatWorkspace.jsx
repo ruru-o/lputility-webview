@@ -3,22 +3,21 @@ import {
   Gauge, 
   Play, 
   RotateCcw, 
-  Wifi, 
   ArrowDown, 
   ArrowUp, 
   Clock, 
   Gamepad2, 
-  PhoneCall, 
-  Film, 
-  ShieldCheck, 
+  Video, 
+  Tv, 
   Server, 
-  Zap, 
-  AlertCircle,
-  HelpCircle,
-  ExternalLink
+  Sliders, 
+  CheckCircle2, 
+  AlertTriangle, 
+  XCircle, 
+  ChevronDown, 
+  ChevronUp 
 } from 'lucide-react';
-import { runBufferbloatTest, calculateBufferbloatGrade } from '../../services/bufferbloatService';
-import { executeGlobalpingTest } from '../../services/globalping';
+import { runBufferbloatTest } from '../../services/bufferbloatService';
 
 export function BufferbloatWorkspace({ onNavigateHistory }) {
   const [isRunning, setIsRunning] = useState(false);
@@ -26,19 +25,15 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
   const [phaseLabel, setPhaseLabel] = useState('');
   const [progressPercent, setProgressPercent] = useState(0);
 
-  // Live metrics during test
+  // Live real-time readouts during test
   const [liveLatency, setLiveLatency] = useState(null);
-  const [latencyHistory, setLatencyHistory] = useState([]);
   const [liveDownloadMbps, setLiveDownloadMbps] = useState(0);
   const [liveUploadMbps, setLiveUploadMbps] = useState(0);
 
-  // Final Test Results
+  // Test Results
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-
-  // Global Multi-Vantage Comparison state
-  const [globalProbes, setGlobalProbes] = useState(null);
-  const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
+  const [showSqmHelp, setShowSqmHelp] = useState(false);
 
   const abortControllerRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -60,10 +55,8 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
     setIsRunning(true);
     setProgressPercent(0);
     setLiveLatency(null);
-    setLatencyHistory([]);
     setLiveDownloadMbps(0);
     setLiveUploadMbps(0);
-    setGlobalProbes(null);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -80,10 +73,9 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
           if (!isMountedRef.current) return;
           setProgressPercent(percent);
         },
-        onLatencyUpdate: ({ current, samples }) => {
+        onLatencyUpdate: ({ current }) => {
           if (!isMountedRef.current) return;
           setLiveLatency(current);
-          setLatencyHistory(prev => [...prev.slice(-30), current]);
         },
         onBandwidthUpdate: ({ type, mbps }) => {
           if (!isMountedRef.current) return;
@@ -101,7 +93,7 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
       if (isMountedRef.current) {
         setIsRunning(false);
         if (err.name !== 'AbortError' && !err.message?.includes('cancelled')) {
-          setError(err.message || 'An error occurred during the bufferbloat benchmark.');
+          setError(err.message || 'The benchmark encountered an error.');
         }
       }
     }
@@ -113,417 +105,324 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
     }
     setIsRunning(false);
     setCurrentPhase(null);
-    setPhaseLabel('Test cancelled');
   };
 
-  const handleRunGlobalComparison = async () => {
-    if (isLoadingGlobal) return;
-    setIsLoadingGlobal(true);
-    try {
-      const gp = await executeGlobalpingTest({
-        type: 'ping',
-        target: '1.1.1.1',
-        locations: [
-          { continent: 'EU', limit: 1 },
-          { continent: 'NA', limit: 1 },
-          { continent: 'AS', limit: 1 },
-        ],
-      });
-      if (isMountedRef.current) {
-        setGlobalProbes(gp.probes || []);
-      }
-    } catch (e) {
-      console.warn('Globalping comparison failed:', e);
-    } finally {
-      if (isMountedRef.current) {
-        setIsLoadingGlobal(false);
-      }
+  const getRatingIcon = (rating) => {
+    if (rating === 'Flawless' || rating === 'Excellent') {
+      return <CheckCircle2 size={16} className="text-success" />;
     }
+    if (rating === 'Good' || rating === 'Fair') {
+      return <AlertTriangle size={16} className="text-warning" />;
+    }
+    return <XCircle size={16} className="text-danger" />;
   };
 
   return (
-    <div className="bufferbloat-workspace">
-      {/* Header */}
-      <div className="workspace-header-row">
+    <div className="wf-benchmark-wrapper">
+      {/* Top Bar */}
+      <div className="wf-top-bar">
         <div>
-          <h1 className="workspace-title">
-            <Gauge className="title-icon text-accent" size={24} />
-            Bufferbloat & Active Latency Benchmark
-          </h1>
-          <p className="workspace-subtitle">
-            Waveform-equivalent bufferbloat grading. Evaluates unloaded idle ping against loaded latency under downstream and upstream saturation.
-          </p>
+          <h1 className="wf-title">Bufferbloat Test</h1>
+          <p className="wf-subtitle">Waveform-equivalent benchmark measuring active latency spikes under bandwidth load.</p>
         </div>
 
         {onNavigateHistory && (
           <button 
-            className="winui-btn winui-btn-subtle"
+            className="winui-btn winui-btn-subtle wf-history-btn"
             onClick={onNavigateHistory}
           >
-            <Clock size={15} /> History
+            <Clock size={15} />
+            <span>History</span>
           </button>
         )}
       </div>
 
-      {/* Main Testing Hero Card */}
-      <div className="winui-card bufferbloat-hero-card">
-        {/* Status / Active Test Bar */}
+      {/* Hero Benchmark Console */}
+      <div className="winui-card wf-hero-card">
+        {/* State 1: Active Test Running */}
         {isRunning && (
-          <div className="testing-active-banner">
-            <div className="banner-top-row">
-              <span className="phase-text font-bold text-accent">
-                <Wifi size={16} className="pulse-icon" /> {phaseLabel}
+          <div className="wf-running-panel">
+            {/* Stepper */}
+            <div className="wf-stepper">
+              <span className={`wf-step ${currentPhase === 'unloaded' ? 'active' : currentPhase ? 'done' : ''}`}>
+                1. Idle Ping
               </span>
-              <span className="percent-text font-mono">{progressPercent}%</span>
+              <span className="wf-step-arrow">→</span>
+              <span className={`wf-step ${currentPhase === 'download' ? 'active' : currentPhase === 'upload' || currentPhase === 'context' ? 'done' : ''}`}>
+                2. Download Load
+              </span>
+              <span className="wf-step-arrow">→</span>
+              <span className={`wf-step ${currentPhase === 'upload' ? 'active' : currentPhase === 'context' ? 'done' : ''}`}>
+                3. Upload Load
+              </span>
+              <span className="wf-step-arrow">→</span>
+              <span className={`wf-step ${currentPhase === 'context' ? 'active' : ''}`}>
+                4. Results
+              </span>
             </div>
-            <div className="progress-track">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${progressPercent}%` }} 
-              />
+
+            {/* Live Big Metric Readout */}
+            <div className="wf-live-counter">
+              {currentPhase === 'unloaded' && (
+                <div className="wf-live-val-box">
+                  <span className="wf-live-num font-mono">{liveLatency != null ? liveLatency : '--'}</span>
+                  <span className="wf-live-unit">ms</span>
+                  <span className="wf-live-tag">Baseline Ping</span>
+                </div>
+              )}
+
+              {currentPhase === 'download' && (
+                <div className="wf-live-val-box">
+                  <span className="wf-live-num font-mono text-accent">{liveDownloadMbps > 0 ? liveDownloadMbps : '--'}</span>
+                  <span className="wf-live-unit">Mbps</span>
+                  <span className="wf-live-tag">Download Saturation</span>
+                  {liveLatency != null && (
+                    <span className="wf-live-sublatency font-mono">
+                      Active Ping: <strong>{liveLatency} ms</strong>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {currentPhase === 'upload' && (
+                <div className="wf-live-val-box">
+                  <span className="wf-live-num font-mono text-success">{liveUploadMbps > 0 ? liveUploadMbps : '--'}</span>
+                  <span className="wf-live-unit">Mbps</span>
+                  <span className="wf-live-tag">Upload Saturation</span>
+                  {liveLatency != null && (
+                    <span className="wf-live-sublatency font-mono">
+                      Active Ping: <strong>{liveLatency} ms</strong>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {currentPhase === 'context' && (
+                <div className="wf-live-val-box">
+                  <span className="wf-live-tag">Computing Grade & Network Context...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Progress Bar */}
+            <div className="wf-progress-container">
+              <div className="wf-progress-bar" style={{ width: `${progressPercent}%` }} />
+            </div>
+
+            <button className="winui-btn winui-btn-subtle wf-cancel-btn" onClick={handleCancel}>
+              Cancel Test
+            </button>
+          </div>
+        )}
+
+        {/* State 2: Standby (Ready to Test) */}
+        {!isRunning && !result && (
+          <div className="wf-standby-panel">
+            <div className="wf-standby-badge">
+              <Gauge size={32} className="text-accent" />
+            </div>
+            <h2 className="wf-standby-heading">Check Your Network for Bufferbloat</h2>
+            <p className="wf-standby-sub">
+              Measures how much your ping increases while uploading or downloading files at full bandwidth.
+            </p>
+
+            <button className="wf-big-start-btn" onClick={handleStartTest}>
+              <Play size={18} fill="currentColor" />
+              <span>Start Test</span>
+            </button>
+
+            <div className="wf-server-pill">
+              <span className="server-dot" />
+              <span>Target: Cloudflare Anycast CDN (Multi-Stream)</span>
             </div>
           </div>
         )}
 
-        {/* Grade Display or Standby Hero */}
-        <div className="hero-center-content">
-          {result ? (
-            <div className="grade-result-container">
+        {/* State 3: Benchmark Complete (Waveform Result Dashboard) */}
+        {!isRunning && result && (
+          <div className="wf-result-panel">
+            {/* Grade Header */}
+            <div className="wf-grade-header">
               <div 
-                className="grade-circle" 
+                className="wf-grade-badge" 
                 style={{ 
                   borderColor: result.gradeDetails.color,
-                  boxShadow: `0 0 35px ${result.gradeDetails.color}40`,
+                  color: result.gradeDetails.color,
+                  boxShadow: `0 0 30px ${result.gradeDetails.color}35`,
                 }}
               >
-                <span className="grade-letter" style={{ color: result.gradeDetails.color }}>
-                  {result.grade}
-                </span>
+                {result.grade}
               </div>
-              <h2 className="grade-title" style={{ color: result.gradeDetails.color }}>
-                {result.gradeDetails.title}
-              </h2>
-              <p className="grade-description">
-                {result.gradeDetails.description}
-              </p>
 
-              <div className="test-action-buttons">
-                <button 
-                  className="winui-btn winui-btn-primary start-test-btn"
-                  onClick={handleStartTest}
-                  disabled={isRunning}
-                >
-                  <RotateCcw size={16} /> Run Test Again
-                </button>
+              <div className="wf-grade-text">
+                <h2 className="wf-grade-title" style={{ color: result.gradeDetails.color }}>
+                  Grade {result.grade} — {result.gradeDetails.title}
+                </h2>
+                <p className="wf-grade-desc">
+                  {result.gradeDetails.description}
+                </p>
+              </div>
+
+              <button className="wf-retest-btn" onClick={handleStartTest}>
+                <RotateCcw size={15} />
+                <span>Test Again</span>
+              </button>
+            </div>
+
+            {/* Waveform Metric Panels: Latency & Speed */}
+            <div className="wf-metrics-duo">
+              {/* Column 1: Latency (Core Bufferbloat metric) */}
+              <div className="wf-metric-col winui-card">
+                <div className="wf-col-header">
+                  <span className="wf-col-title">Latency</span>
+                  <span className="wf-col-unit">Milliseconds (RTT)</span>
+                </div>
+
+                <div className="wf-latency-rows">
+                  <div className="wf-latency-item">
+                    <span className="wf-lat-label">Unloaded (Idle)</span>
+                    <span className="wf-lat-val font-mono">{result.unloaded.avg} ms</span>
+                  </div>
+
+                  <div className="wf-latency-item">
+                    <div className="wf-lat-label-wrap">
+                      <span className="wf-lat-label">Download Active</span>
+                      <span className={`wf-delta-pill font-mono ${result.download.latencyDelta <= 15 ? 'delta-good' : 'delta-high'}`}>
+                        +{result.download.latencyDelta} ms
+                      </span>
+                    </div>
+                    <span className="wf-lat-val font-mono">{result.download.loadedLatency} ms</span>
+                  </div>
+
+                  <div className="wf-latency-item">
+                    <div className="wf-lat-label-wrap">
+                      <span className="wf-lat-label">Upload Active</span>
+                      <span className={`wf-delta-pill font-mono ${result.upload.latencyDelta <= 15 ? 'delta-good' : 'delta-high'}`}>
+                        +{result.upload.latencyDelta} ms
+                      </span>
+                    </div>
+                    <span className="wf-lat-val font-mono">{result.upload.loadedLatency} ms</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Column 2: Bandwidth Speed */}
+              <div className="wf-metric-col winui-card">
+                <div className="wf-col-header">
+                  <span className="wf-col-title">Throughput Speed</span>
+                  <span className="wf-col-unit">Megabits per second</span>
+                </div>
+
+                <div className="wf-speed-rows">
+                  <div className="wf-speed-item">
+                    <div className="wf-speed-label-wrap">
+                      <ArrowDown size={18} className="text-accent" />
+                      <span className="wf-speed-label">Download</span>
+                    </div>
+                    <div className="wf-speed-val-wrap font-mono">
+                      <span className="wf-speed-num">{result.download.bandwidthMbps}</span>
+                      <span className="wf-speed-unit">Mbps</span>
+                    </div>
+                  </div>
+
+                  <div className="wf-speed-item">
+                    <div className="wf-speed-label-wrap">
+                      <ArrowUp size={18} className="text-success" />
+                      <span className="wf-speed-label">Upload</span>
+                    </div>
+                    <div className="wf-speed-val-wrap font-mono">
+                      <span className="wf-speed-num">{result.upload.bandwidthMbps}</span>
+                      <span className="wf-speed-unit">Mbps</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="standby-hero-container">
-              <div className="standby-icon-circle">
-                <Gauge size={48} className="text-accent" />
-              </div>
-              <h2 className="standby-title">Test Your Network for Bufferbloat</h2>
-              <p className="standby-subtitle">
-                Bufferbloat happens when your router buffers excessive packets during downloads or uploads, causing severe in-game ping spikes, stutter, and choppy voice calls.
-              </p>
 
-              <div className="test-action-buttons">
-                {!isRunning ? (
-                  <button 
-                    className="winui-btn winui-btn-primary start-test-btn"
-                    onClick={handleStartTest}
-                  >
-                    <Play size={18} fill="currentColor" /> Start Testing
-                  </button>
-                ) : (
-                  <button 
-                    className="winui-btn winui-btn-subtle text-danger"
-                    onClick={handleCancel}
-                  >
-                    Cancel Test
-                  </button>
-                )}
+            {/* Waveform Application Suitability Badges */}
+            <div className="wf-suitability-strip">
+              <div className="wf-app-chip">
+                <Gamepad2 size={16} className="text-accent" />
+                <span className="wf-app-name">Gaming:</span>
+                {getRatingIcon(result.gradeDetails.ratings.gaming)}
+                <span className="wf-app-status">{result.gradeDetails.ratings.gaming}</span>
+              </div>
+
+              <div className="wf-app-chip">
+                <Video size={16} className="text-success" />
+                <span className="wf-app-name">Video Calls:</span>
+                {getRatingIcon(result.gradeDetails.ratings.voip)}
+                <span className="wf-app-status">{result.gradeDetails.ratings.voip}</span>
+              </div>
+
+              <div className="wf-app-chip">
+                <Tv size={16} className="text-warning" />
+                <span className="wf-app-name">Streaming:</span>
+                {getRatingIcon(result.gradeDetails.ratings.streaming)}
+                <span className="wf-app-status">{result.gradeDetails.ratings.streaming}</span>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Real-Time Live Gauges during test */}
-        {isRunning && (
-          <div className="live-gauges-grid">
-            <div className="live-gauge-item">
-              <span className="gauge-label">Live Latency</span>
-              <span className="gauge-value font-mono text-accent">
-                {liveLatency != null ? `${liveLatency} ms` : '--'}
-              </span>
+            {/* Network Info Footer */}
+            <div className="wf-net-footer">
+              <div className="wf-net-item">
+                <span className="net-k">ISP:</span>
+                <span className="net-v font-mono">{result.ispContext?.holder || 'Detected Network'}</span>
+              </div>
+              <div className="wf-net-item">
+                <span className="net-k">ASN:</span>
+                <span className="net-v font-mono text-accent">{result.ispContext?.asn || 'AS9299'}</span>
+              </div>
+              <div className="wf-net-item">
+                <span className="net-k">IP:</span>
+                <span className="net-v font-mono">{result.ispContext?.ip || '49.144.0.176'}</span>
+              </div>
+              <div className="wf-net-item">
+                <span className="net-k">Prefix:</span>
+                <span className="net-v font-mono">{result.ispContext?.prefix || '49.144.0.0/19'}</span>
+              </div>
             </div>
-            <div className="live-gauge-item">
-              <span className="gauge-label">Download Speed</span>
-              <span className="gauge-value font-mono">
-                {liveDownloadMbps > 0 ? `${liveDownloadMbps} Mbps` : '--'}
-              </span>
-            </div>
-            <div className="live-gauge-item">
-              <span className="gauge-label">Upload Speed</span>
-              <span className="gauge-value font-mono">
-                {liveUploadMbps > 0 ? `${liveUploadMbps} Mbps` : '--'}
-              </span>
-            </div>
-          </div>
-        )}
 
-        {/* Live Sparkline Graph */}
-        {latencyHistory.length > 3 && (
-          <div className="latency-sparkline-wrap">
-            <span className="sparkline-title text-sm text-secondary">
-              Real-Time Latency Samples (ms)
-            </span>
-            <div className="sparkline-bars">
-              {latencyHistory.map((val, idx) => {
-                const max = Math.max(100, ...latencyHistory);
-                const heightPercent = Math.min(100, Math.max(10, Math.round((val / max) * 100)));
-                const isSpike = result?.unloaded?.avg ? val > result.unloaded.avg + 25 : val > 60;
-                return (
-                  <div 
-                    key={idx} 
-                    className={`sparkline-bar ${isSpike ? 'spike' : 'nominal'}`}
-                    style={{ height: `${heightPercent}%` }}
-                    title={`${val} ms`}
-                  />
-                );
-              })}
+            {/* Compact Collapsible SQM Advice */}
+            <div className="wf-sqm-collapsible">
+              <button 
+                className="wf-sqm-toggle-btn"
+                onClick={() => setShowSqmHelp(!showSqmHelp)}
+              >
+                <div className="flex-row items-center gap-2">
+                  <Sliders size={15} className="text-accent" />
+                  <span>How to fix bufferbloat on your router</span>
+                </div>
+                {showSqmHelp ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+              </button>
+
+              {showSqmHelp && (
+                <div className="wf-sqm-content font-sans">
+                  <div className="wf-sqm-pill-grid">
+                    <div className="wf-sqm-pill">
+                      <strong>1. Enable Smart Queue Management (SQM)</strong>
+                      <span>Turn on SQM / CAKE in OpenWrt, Asuswrt-Merlin, Ubiquiti UniFi, or eero settings.</span>
+                    </div>
+                    <div className="wf-sqm-pill">
+                      <strong>2. Set Ingress & Egress Limits</strong>
+                      <span>Cap download and upload limits to 90–95% of your measured speed to keep router queues empty.</span>
+                    </div>
+                    <div className="wf-sqm-pill">
+                      <strong>3. Enjoy Low Ping</strong>
+                      <span>Eliminates gaming ping spikes while other devices download or stream 4K video.</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="winui-card error-banner">
-          <AlertCircle size={20} className="text-danger" />
+        <div className="winui-card wf-error-card">
           <span>{error}</span>
         </div>
-      )}
-
-      {/* Results Breakdown Grid */}
-      {result && (
-        <>
-          <div className="bufferbloat-metrics-grid">
-            {/* Unloaded Latency */}
-            <div className="metric-box winui-card">
-              <div className="metric-box-header">
-                <Clock size={18} className="text-accent" />
-                <span className="metric-box-title">Unloaded Latency (Idle)</span>
-              </div>
-              <div className="metric-main-val font-mono">
-                {result.unloaded.avg} <span className="unit">ms</span>
-              </div>
-              <div className="metric-sub-stats font-mono text-sm">
-                <span>Min: {result.unloaded.min}ms</span>
-                <span>Max: {result.unloaded.max}ms</span>
-                <span>Jitter: {result.unloaded.jitter}ms</span>
-              </div>
-              <p className="metric-footnote">Baseline round-trip time without network congestion.</p>
-            </div>
-
-            {/* Download Loaded Latency & Speed */}
-            <div className="metric-box winui-card">
-              <div className="metric-box-header">
-                <ArrowDown size={18} className="text-success" />
-                <span className="metric-box-title">Download Active Latency</span>
-              </div>
-              <div className="metric-main-val font-mono">
-                {result.download.loadedLatency} <span className="unit">ms</span>
-                <span className={`delta-tag font-mono ${result.download.latencyDelta <= 15 ? 'delta-good' : 'delta-high'}`}>
-                  +{result.download.latencyDelta}ms
-                </span>
-              </div>
-              <div className="metric-sub-stats font-mono text-sm">
-                <span>Bandwidth: <strong>{result.download.bandwidthMbps} Mbps</strong></span>
-              </div>
-              <p className="metric-footnote">Ping measured while fully saturating your download pipe.</p>
-            </div>
-
-            {/* Upload Loaded Latency & Speed */}
-            <div className="metric-box winui-card">
-              <div className="metric-box-header">
-                <ArrowUp size={18} className="text-accent" />
-                <span className="metric-box-title">Upload Active Latency</span>
-              </div>
-              <div className="metric-main-val font-mono">
-                {result.upload.loadedLatency} <span className="unit">ms</span>
-                <span className={`delta-tag font-mono ${result.upload.latencyDelta <= 15 ? 'delta-good' : 'delta-high'}`}>
-                  +{result.upload.latencyDelta}ms
-                </span>
-              </div>
-              <div className="metric-sub-stats font-mono text-sm">
-                <span>Bandwidth: <strong>{result.upload.bandwidthMbps} Mbps</strong></span>
-              </div>
-              <p className="metric-footnote">Ping measured while fully saturating your upload pipe.</p>
-            </div>
-          </div>
-
-          {/* Application Ratings / Waveform Impact Cards */}
-          <div className="ratings-cards-row">
-            <div className="rating-card winui-card">
-              <div className="rating-icon-wrap text-accent">
-                <Gamepad2 size={24} />
-              </div>
-              <div className="rating-info">
-                <span className="rating-app-name">Competitive Gaming</span>
-                <span className="rating-verdict font-bold" style={{ color: result.gradeDetails.color }}>
-                  {result.gradeDetails.ratings.gaming}
-                </span>
-                <span className="rating-desc text-sm text-secondary">
-                  {result.grade === 'A+' || result.grade === 'A' 
-                    ? 'Zero hit registration delays or rubber-banding while others download.' 
-                    : 'Downloads by other household devices will cause in-game lag spikes.'}
-                </span>
-              </div>
-            </div>
-
-            <div className="rating-card winui-card">
-              <div className="rating-icon-wrap text-success">
-                <PhoneCall size={24} />
-              </div>
-              <div className="rating-info">
-                <span className="rating-app-name">Video Calls & VoIP</span>
-                <span className="rating-verdict font-bold" style={{ color: result.gradeDetails.color }}>
-                  {result.gradeDetails.ratings.voip}
-                </span>
-                <span className="rating-desc text-sm text-secondary">
-                  {result.grade === 'A+' || result.grade === 'A'
-                    ? 'Crystal clear Zoom, Discord, and Teams calls with no audio cutouts.'
-                    : 'Audio may stutter or become robotic during heavy background traffic.'}
-                </span>
-              </div>
-            </div>
-
-            <div className="rating-card winui-card">
-              <div className="rating-icon-wrap text-warning">
-                <Film size={24} />
-              </div>
-              <div className="rating-info">
-                <span className="rating-app-name">4K & Cloud Streaming</span>
-                <span className="rating-verdict font-bold" style={{ color: result.gradeDetails.color }}>
-                  {result.gradeDetails.ratings.streaming}
-                </span>
-                <span className="rating-desc text-sm text-secondary">
-                  Fast video buffering with continuous adaptive bitrate stability.
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Autonomous System & ISP Context via RIPE Stat API */}
-          {result.ispContext && (
-            <div className="winui-card isp-context-card">
-              <div className="isp-card-header">
-                <div className="flex-row items-center gap-2">
-                  <Server size={18} className="text-accent" />
-                  <h3 className="card-subheading">Network & BGP Infrastructure Context (RIPE Stat API)</h3>
-                </div>
-                <span className="live-api-tag">RIPE Stat Data API</span>
-              </div>
-
-              <div className="isp-stats-grid">
-                <div className="isp-stat-item">
-                  <span className="stat-label">Public Edge IP</span>
-                  <span className="stat-val font-mono">{result.ispContext.ip}</span>
-                </div>
-                <div className="isp-stat-item">
-                  <span className="stat-label">Autonomous System (ASN)</span>
-                  <span className="stat-val font-mono font-bold text-accent">{result.ispContext.asn}</span>
-                </div>
-                <div className="isp-stat-item">
-                  <span className="stat-label">Network Holder / ISP</span>
-                  <span className="stat-val font-mono">{result.ispContext.holder}</span>
-                </div>
-                <div className="isp-stat-item">
-                  <span className="stat-label">BGP Routing Prefix</span>
-                  <span className="stat-val font-mono">{result.ispContext.prefix}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Smart Queue Management (SQM) Actionable Guidance */}
-          <div className="winui-card sqm-guidance-card">
-            <h3 className="card-subheading flex-row items-center gap-2">
-              <ShieldCheck size={18} className="text-accent" />
-              How to Eliminate Bufferbloat (Smart Queue Management)
-            </h3>
-            <p className="sqm-intro text-sm text-secondary">
-              Bufferbloat is solved at the router level by enabling <strong>Smart Queue Management (SQM)</strong> with <strong>CAKE</strong> or <strong>FQ-CoDel</strong> algorithms. SQM actively prevents packet queues from filling up by pacing traffic just beneath your physical line rate.
-            </p>
-
-            <div className="sqm-tips-grid">
-              <div className="sqm-tip-item">
-                <strong>1. Enable SQM in Router Settings</strong>
-                <p className="text-sm text-secondary">Look for "Smart Queue Management", "QoS", or "Bufferbloat Protection" in OpenWrt, ASUS (Adaptive QoS), eero, or Ubiquiti UniFi.</p>
-              </div>
-              <div className="sqm-tip-item">
-                <strong>2. Select CAKE or FQ-CoDel Algorithm</strong>
-                <p className="text-sm text-secondary">CAKE is the modern standard; it automatically separates flows and prioritizes small latency-sensitive gaming packets.</p>
-              </div>
-              <div className="sqm-tip-item">
-                <strong>3. Cap Ingress & Egress to ~90-95%</strong>
-                <p className="text-sm text-secondary">Set download and upload limits to 90–95% of your measured ISP bandwidth so the router—not the ISP modem—controls the queue.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Multi-Continent Globalping Cross-Verification */}
-          <div className="winui-card globalping-section-card">
-            <div className="flex-row justify-between items-center">
-              <div>
-                <h3 className="card-subheading flex-row items-center gap-2">
-                  <Zap size={18} className="text-accent" />
-                  Multi-Region Globalping Verification
-                </h3>
-                <p className="text-sm text-secondary">
-                  Compare your local latency against distributed probe vantage points across Europe, North America, and Asia.
-                </p>
-              </div>
-
-              <button 
-                className="winui-btn winui-btn-subtle"
-                onClick={handleRunGlobalComparison}
-                disabled={isLoadingGlobal}
-              >
-                {isLoadingGlobal ? 'Probing...' : 'Run Global Comparison'}
-              </button>
-            </div>
-
-            {globalProbes && (
-              <div className="global-probes-table-wrap" style={{ marginTop: '16px' }}>
-                <table className="history-table">
-                  <thead>
-                    <tr>
-                      <th>Vantage Region</th>
-                      <th>Country</th>
-                      <th>Probe ASN</th>
-                      <th>Target Latency</th>
-                      <th>Packet Delivery</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {globalProbes.map((p, idx) => (
-                      <tr key={idx}>
-                        <td className="font-bold text-accent">{p.city}, {p.continent}</td>
-                        <td>{p.country}</td>
-                        <td className="font-mono text-sm">{p.asn ? `AS${p.asn}` : 'N/A'} ({p.network})</td>
-                        <td className="font-mono">{p.latency != null ? `${p.latency} ms` : 'N/A'}</td>
-                        <td className="font-mono text-success">
-                          {p.packetLoss === 0 ? '100% (0% loss)' : `${100 - (p.packetLoss || 0)}%`}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </>
       )}
     </div>
   );

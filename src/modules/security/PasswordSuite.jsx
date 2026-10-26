@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Copy, Check, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Copy, Check, RefreshCw, KeyRound, ShieldCheck } from 'lucide-react';
 import { generateSecurePassword } from '../../utils/crypto';
 
 const SETS = [
@@ -11,16 +11,15 @@ const SETS = [
 
 const MIN_LEN = 8;
 const MAX_LEN = 64;
-const NIST_MIN = 15;
 
 function tierColor(tier) {
-  if (tier === 'Very Weak' || tier === 'Weak') return 'var(--accent-brand-text)';
-  if (tier === 'Moderate') return 'var(--accent-warning)';
-  return 'var(--accent-success)';
+  if (tier === 'Very Weak' || tier === 'Weak') return '#ef4444';
+  if (tier === 'Moderate') return '#f59e0b';
+  return '#10b981';
 }
 
 export function PasswordSuite() {
-  const [length, setLength] = useState(16);
+  const [length, setLength] = useState(18);
   const [sets, setSets] = useState({
     useLower: true,
     useUpper: true,
@@ -38,7 +37,6 @@ export function PasswordSuite() {
     } catch (err) {
       return { error: err.message };
     }
-    // nonce forces a fresh password on "Generate"
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [length, sets, nonce]);
 
@@ -53,7 +51,7 @@ export function PasswordSuite() {
   }, [copied]);
 
   const toggleSet = (key) => {
-    if (sets[key] && activeCount === 1) return; // keep at least one set on
+    if (sets[key] && activeCount === 1) return;
     setSets((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -71,178 +69,85 @@ export function PasswordSuite() {
   const color = d ? tierColor(d.tier) : 'var(--text-muted)';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '720px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>
-          Password Generator
-        </h2>
+    <div className="wf-benchmark-wrapper">
+      <div className="wf-top-bar">
+        <div>
+          <h1 className="wf-title">Password & Secret Generator</h1>
+          <p className="wf-subtitle">Cryptographically secure tokens with NIST SP 800-63B Shannon entropy metrics.</p>
+        </div>
       </div>
 
-      {/* Output */}
-      <div className="winui-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {result.error ? (
-          <div className="winui-codebox" style={{ color: 'var(--accent-brand-text)' }}>
-            {result.error}
+      <div className="winui-card wf-password-card">
+        {/* Output Box */}
+        <div className="wf-pass-output-row">
+          <div className="wf-pass-text font-mono">
+            {d?.password || '...'}
           </div>
-        ) : (
-          <div
-            className="winui-codebox"
-            style={{
-              fontSize: '1.05rem',
-              padding: '14px 16px',
-              color: 'var(--text-primary)',
-              wordBreak: 'break-all',
-              userSelect: 'all',
-              letterSpacing: '0.02em',
-            }}
-          >
-            {d.password}
-          </div>
-        )}
 
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="winui-btn winui-btn-primary" onClick={copy} disabled={!d}>
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-          <button className="winui-btn" onClick={() => setNonce((n) => n + 1)}>
-            <RefreshCw size={14} />
-            Generate
-          </button>
+          <div className="wf-pass-actions">
+            <button className="winui-btn winui-btn-primary" onClick={copy} disabled={!d}>
+              {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            <button className="winui-btn winui-btn-subtle" onClick={() => setNonce((n) => n + 1)}>
+              <RefreshCw size={14} />
+              <span>Regenerate</span>
+            </button>
+          </div>
         </div>
 
+        {/* Strength Meter */}
         {d && (
-          <>
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  marginBottom: '6px',
-                }}
-              >
-                <span style={{ fontSize: '0.82rem', fontWeight: 600, color }}>{d.tier}</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                  {d.entropyBits} bits
-                </span>
-              </div>
-              <div
-                style={{
-                  height: '5px',
-                  borderRadius: '3px',
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    width: `${d.percentage}%`,
-                    height: '100%',
-                    background: color,
-                    opacity: 0.85,
-                    transition: 'width 0.2s ease, background 0.2s ease',
-                  }}
-                />
-              </div>
+          <div className="wf-strength-wrap">
+            <div className="flex-row justify-between items-center" style={{ marginBottom: '6px' }}>
+              <span className="font-bold text-sm" style={{ color }}>{d.tier}</span>
+              <span className="font-mono text-xs text-muted">{d.entropyBits} bits entropy</span>
             </div>
-
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <span className="winui-badge">Length {d.length}</span>
-              <span className="winui-badge">Pool {d.poolSize}</span>
-              <span className="winui-badge">Crack time: {d.crackTime}</span>
+            <div className="wf-strength-track">
+              <div 
+                className="wf-strength-bar" 
+                style={{ width: `${d.percentage}%`, backgroundColor: color }} 
+              />
             </div>
-
-            {d.nistWarning && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--accent-brand-subtle)',
-                  border: '1px solid var(--accent-brand-border)',
-                  color: 'var(--accent-brand-text)',
-                  fontSize: '0.78rem',
-                }}
-              >
-                <AlertTriangle size={14} style={{ flexShrink: 0 }} />
-                Under {NIST_MIN} characters. NIST advises {NIST_MIN}+.
-              </div>
-            )}
-          </>
+          </div>
         )}
-      </div>
 
-      {/* Options */}
-      <div className="winui-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '8px',
-            }}
-          >
-            <label
-              htmlFor="pw-length"
-              style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}
-            >
-              Length
-            </label>
-            <span className="winui-badge winui-badge-brand">{length}</span>
+        {/* Controls */}
+        <div className="wf-pass-controls-grid">
+          {/* Length Slider */}
+          <div className="wf-pass-ctrl-col">
+            <div className="flex-row justify-between items-center" style={{ marginBottom: '8px' }}>
+              <label className="wf-field-label">Length: {length} chars</label>
+            </div>
+            <input
+              type="range"
+              min={MIN_LEN}
+              max={MAX_LEN}
+              value={length}
+              onChange={(e) => setLength(parseInt(e.target.value, 10))}
+              className="winui-range"
+            />
           </div>
-          <input
-            id="pw-length"
-            type="range"
-            min={MIN_LEN}
-            max={MAX_LEN}
-            value={length}
-            onChange={(e) => setLength(Number(e.target.value))}
-            style={{ width: '100%', accentColor: 'var(--accent-brand-hover)', cursor: 'pointer' }}
-          />
-        </div>
 
-        <div>
-          <div
-            style={{
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              marginBottom: '8px',
-            }}
-          >
-            Characters
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
-            {SETS.map((s) => {
-              const on = sets[s.key];
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  aria-pressed={on}
-                  title={s.name}
-                  onClick={() => toggleSet(s.key)}
-                  className={`winui-card${on ? ' winui-card-selected' : ''}`}
-                  style={{
-                    padding: '10px 12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    color: on ? 'var(--accent-brand-text)' : 'var(--text-secondary)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  {s.label}
-                  {on && <Check size={14} />}
-                </button>
-              );
-            })}
+          {/* Character Toggles */}
+          <div className="wf-pass-ctrl-col">
+            <label className="wf-field-label">Character Sets</label>
+            <div className="wf-chips-row">
+              {SETS.map((s) => {
+                const on = sets[s.key];
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    className={`wf-chip ${on ? 'active' : ''}`}
+                    onClick={() => toggleSet(s.key)}
+                  >
+                    <span>{s.label}</span>
+                    <span className="text-xs text-muted">({s.name})</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

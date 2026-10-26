@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   Gauge, 
-  Layers, 
   Network, 
   Globe2, 
   KeyRound, 
@@ -20,7 +19,6 @@ export function Sidebar({
 }) {
   const navItems = [
     { id: 'bufferbloat', label: 'Bufferbloat Test', icon: Gauge },
-    { id: 'tools', label: 'All Tools', icon: Layers },
     { id: 'ipv4', label: 'IPv4 Subnets', icon: Network },
     { id: 'ipv6', label: 'IPv6 Calculator', icon: Globe2 },
     { id: 'passwords', label: 'Password Generator', icon: KeyRound },
@@ -52,7 +50,7 @@ export function Sidebar({
             <button 
               className="winui-btn winui-btn-subtle desktop-toggle-btn"
               onClick={() => setIsCollapsed(!isCollapsed)}
-              title={isCollapsed ? 'Expand' : 'Collapse'}
+              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-label="Toggle Sidebar"
             >
               {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}

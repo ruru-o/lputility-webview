@@ -3,7 +3,6 @@ import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BufferbloatWorkspace } from './modules/bufferbloat/BufferbloatWorkspace';
-import { CapabilityCatalog } from './modules/catalog/CapabilityCatalog';
 import { IPv4Suite } from './modules/networking/IPv4Suite';
 import { IPv6Suite } from './modules/networking/IPv6Suite';
 import { PasswordSuite } from './modules/security/PasswordSuite';
@@ -19,15 +18,6 @@ export function App() {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
 
-  const handleSelectCapability = (cap) => {
-    if (cap?.targetTab) {
-      setActiveTab(cap.targetTab);
-    } else {
-      setActiveTab('bufferbloat');
-    }
-    setIsMobileMenuOpen(false);
-  };
-
   return (
     <div className="lputility-app-shell">
       {/* Top Header */}
@@ -38,6 +28,7 @@ export function App() {
           setActiveTab(tab);
           setIsMobileMenuOpen(false);
         }}
+        activeTab={activeTab}
       />
 
       <div className="app-body-container">
@@ -57,12 +48,6 @@ export function App() {
             {activeTab === 'bufferbloat' && (
               <BufferbloatWorkspace 
                 onNavigateHistory={() => setActiveTab('history')}
-              />
-            )}
-
-            {activeTab === 'tools' && (
-              <CapabilityCatalog 
-                onSelectCapability={handleSelectCapability}
               />
             )}
 
