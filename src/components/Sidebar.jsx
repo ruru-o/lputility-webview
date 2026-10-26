@@ -5,6 +5,7 @@ import {
   Globe2, 
   KeyRound, 
   History, 
+  Activity,
   ChevronLeft, 
   ChevronRight 
 } from 'lucide-react';
@@ -19,6 +20,7 @@ export function Sidebar({
 }) {
   const navItems = [
     { id: 'bufferbloat', label: 'Bufferbloat Test', icon: Gauge },
+    { id: 'apis', label: 'API Status', icon: Activity },
     { id: 'ipv4', label: 'IPv4 Subnets', icon: Network },
     { id: 'ipv6', label: 'IPv6 Calculator', icon: Globe2 },
     { id: 'passwords', label: 'Password Generator', icon: KeyRound },

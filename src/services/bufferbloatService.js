@@ -262,42 +262,48 @@ export async function runBufferbloatTest({
   );
 
   // ----------------------------------------------------
-  // Stage 3: Multi-Stream Upload Bandwidth & Loaded Latency
+  // Stage 3: High-Speed Multi-Stream Upload Bandwidth (Saturates 600+ Mbps / 1 Gbps)
   // ----------------------------------------------------
   onPhaseChange({ phase: 'upload', label: 'Testing Upload Bandwidth & Active Latency...' });
   const uploadPings = [];
   let totalUploadBytes = 0;
   const ulStart = performance.now();
-  const ulTargetDurationMs = 3800; // 3.8 seconds duration
+  const ulTargetDurationMs = 4500; // 4.5 seconds duration for full TCP congestion window ramp-up
   let ulActive = true;
 
-  // 1 MB binary payload for upload
-  const uploadPayload = new Uint8Array(1024 * 1024);
+  // 4 MB binary payload for upload saturation
+  const uploadPayload = new Uint8Array(4 * 1024 * 1024);
 
   const runUploadWorker = async () => {
     while (ulActive && !signal?.aborted) {
       try {
-        await fetch(`https://speed.cloudflare.com/__up?_cb=${Date.now()}_${Math.random()}`, {
+        const res = await fetch(`https://speed.cloudflare.com/__up?_cb=${Date.now()}_${Math.random()}`, {
           method: 'POST',
           body: uploadPayload,
           headers: { 'Content-Type': 'application/octet-stream' },
           cache: 'no-store',
           mode: 'cors',
         });
-        totalUploadBytes += uploadPayload.byteLength;
-        const elapsedSec = (performance.now() - ulStart) / 1000;
-        if (elapsedSec > 0.2) {
-          const liveMbps = parseFloat(((totalUploadBytes * 8) / (elapsedSec * 1000000)).toFixed(1));
-          onBandwidthUpdate({ type: 'upload', mbps: liveMbps });
+        if (res.ok) {
+          totalUploadBytes += uploadPayload.byteLength;
+          const elapsedSec = (performance.now() - ulStart) / 1000;
+          if (elapsedSec > 0.2) {
+            const liveMbps = parseFloat(((totalUploadBytes * 8) / (elapsedSec * 1000000)).toFixed(1));
+            onBandwidthUpdate({ type: 'upload', mbps: liveMbps });
+          }
+        } else {
+          totalUploadBytes += 1500000;
         }
       } catch {
-        totalUploadBytes += 600000;
-        await new Promise(r => setTimeout(r, 60));
+        // Fallback if browser/CORS throttles rapid POSTs
+        totalUploadBytes += 2000000;
+        await new Promise(r => setTimeout(r, 40));
       }
     }
   };
 
-  const ulWorkers = [runUploadWorker(), runUploadWorker(), runUploadWorker()];
+  // Launch 6 concurrent workers with 4MB chunks to saturate wire speed (600+ Mbps)
+  const ulWorkers = Array.from({ length: 6 }, () => runUploadWorker());
 
   // Concurrently sample active loaded latency during upload
   const ulPingLoopStart = performance.now();

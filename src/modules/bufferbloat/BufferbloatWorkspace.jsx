@@ -173,7 +173,7 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
 
               {currentPhase === 'download' && (
                 <div className="wf-live-val-box">
-                  <span className="wf-live-num font-mono text-accent">{liveDownloadMbps > 0 ? liveDownloadMbps : '--'}</span>
+                  <span className="wf-live-num font-mono text-accent">{liveDownloadMbps > 0 ? liveDownloadMbps : '...'}</span>
                   <span className="wf-live-unit">Mbps</span>
                   <span className="wf-live-tag">Download Saturation</span>
                   {liveLatency != null && (
@@ -186,7 +186,7 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
 
               {currentPhase === 'upload' && (
                 <div className="wf-live-val-box">
-                  <span className="wf-live-num font-mono text-success">{liveUploadMbps > 0 ? liveUploadMbps : '--'}</span>
+                  <span className="wf-live-num font-mono text-success">{liveUploadMbps > 0 ? liveUploadMbps : '...'}</span>
                   <span className="wf-live-unit">Mbps</span>
                   <span className="wf-live-tag">Upload Saturation</span>
                   {liveLatency != null && (

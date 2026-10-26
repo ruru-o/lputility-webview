@@ -7,6 +7,7 @@ import { IPv4Suite } from './modules/networking/IPv4Suite';
 import { IPv6Suite } from './modules/networking/IPv6Suite';
 import { PasswordSuite } from './modules/security/PasswordSuite';
 import { TelemetryHistory } from './modules/history/TelemetryHistory';
+import { ApiHealthWorkspace } from './modules/api/ApiHealthWorkspace';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('bufferbloat');
@@ -49,6 +50,10 @@ export function App() {
               <BufferbloatWorkspace 
                 onNavigateHistory={() => setActiveTab('history')}
               />
+            )}
+
+            {activeTab === 'apis' && (
+              <ApiHealthWorkspace />
             )}
 
             {activeTab === 'ipv4' && (
