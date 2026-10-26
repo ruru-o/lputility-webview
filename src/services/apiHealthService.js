@@ -12,6 +12,7 @@ export const MONITORED_APIS = [
     url: 'https://speed.cloudflare.com/__down?bytes=1000',
     protocol: 'HTTP/2 HTTPS',
     headers: {},
+    typicalFrametime: 95,
   },
   {
     id: 'cloudflare-doh',
@@ -21,6 +22,7 @@ export const MONITORED_APIS = [
     url: 'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A',
     protocol: 'DoH (RFC 8484)',
     headers: { 'Accept': 'application/dns-json' },
+    typicalFrametime: 14,
   },
   {
     id: 'ripestat',
@@ -30,6 +32,7 @@ export const MONITORED_APIS = [
     url: 'https://stat.ripe.net/data/as-overview/data.json?resource=AS13335',
     protocol: 'REST JSON',
     headers: {},
+    typicalFrametime: 445,
   },
   {
     id: 'ipify',
@@ -39,6 +42,7 @@ export const MONITORED_APIS = [
     url: 'https://api.ipify.org?format=json',
     protocol: 'REST JSON',
     headers: {},
+    typicalFrametime: 295,
   },
   {
     id: 'globalping',
@@ -48,6 +52,7 @@ export const MONITORED_APIS = [
     url: 'https://api.globalping.io/v1/limits',
     protocol: 'REST JSON',
     headers: {},
+    typicalFrametime: 410,
   },
   {
     id: 'google-doh',
@@ -57,6 +62,7 @@ export const MONITORED_APIS = [
     url: 'https://dns.google/resolve?name=example.com&type=A',
     protocol: 'DoH JSON',
     headers: { 'Accept': 'application/json' },
+    typicalFrametime: 26,
   },
 ];
 

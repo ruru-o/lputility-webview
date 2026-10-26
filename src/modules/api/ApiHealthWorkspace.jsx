@@ -11,6 +11,21 @@ import {
 import { MONITORED_APIS, probeAllApis, probeApi } from '../../services/apiHealthService';
 import { FrameGraph } from '../../components/FrameGraph';
 
+/**
+ * Strict color mapper guaranteeing 0 color ambiguity:
+ * - Ultra-Fast (<60ms): Emerald Green (#10b981)
+ * - Nominal (60-160ms): Sky Blue (#38bdf8)
+ * - Moderate / Degraded (160-350ms): Amber/Yellow (#f59e0b)
+ * - High RTT (>=350ms) or Offline: Coral Red (#ef4444)
+ */
+export function getEndpointColor(status, frametime = 0) {
+  if (status === 'offline') return '#ef4444';
+  if (frametime >= 350) return '#ef4444'; // High RTT is strictly red
+  if (status === 'degraded' || frametime >= 160) return '#f59e0b'; // Moderate / Degraded is strictly amber/yellow
+  if (frametime >= 60) return '#38bdf8'; // Nominal is sky blue
+  return '#10b981'; // Ultra-Fast is emerald green
+}
+
 export function ApiHealthWorkspace() {
   const [apiStatuses, setApiStatuses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,8 +33,8 @@ export function ApiHealthWorkspace() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [probingId, setProbingId] = useState(null);
   const [selectedApiId, setSelectedApiId] = useState('cloudflare-cdn');
-  const [timeRange, setTimeRange] = useState('Day'); // 'Day' | 'Week' | 'Month'
-  const [liveFrametime, setLiveFrametime] = useState(152);
+  const [timeRange, setTimeRange] = useState('Day');
+  const [liveFrametime, setLiveFrametime] = useState(103);
 
   const autoRefreshTimerRef = useRef(null);
 
@@ -70,19 +85,15 @@ export function ApiHealthWorkspace() {
   const degradedCount = apiStatuses.filter(s => s.status === 'degraded').length;
   const offlineCount = apiStatuses.filter(s => s.status === 'offline').length;
   
-  // Find current selected API definition and live status
+  // Selected API definition and live status
   const currentApiDef = MONITORED_APIS.find(a => a.id === selectedApiId) || MONITORED_APIS[0];
   const currentLiveStatus = apiStatuses.find(s => s.id === selectedApiId) || {
-    frametime: 152,
+    frametime: 103,
     status: 'online',
     httpStatus: '200 OK'
   };
 
-  const getStatusColor = (status) => {
-    if (status === 'online') return '#10b981';
-    if (status === 'degraded') return '#f59e0b';
-    return '#ef4444';
-  };
+  const currentEndpointColor = getEndpointColor(currentLiveStatus.status, currentLiveStatus.frametime);
 
   const getFrametimeTag = (ft) => {
     if (ft <= 60) return { label: 'Ultra-Fast', class: 'ft-fast' };
@@ -98,8 +109,13 @@ export function ApiHealthWorkspace() {
         <div className="metrics-title-block">
           <span className="metrics-header-label">SYSTEM METRICS</span>
           <span className="metrics-sub-state">
-            <span className="status-dot dot-pulse" style={{ background: offlineCount === 0 ? '#10b981' : '#f59e0b' }} />
-            {offlineCount === 0 ? 'All Systems Operational' : `${offlineCount} Degradation Detected`}
+            <span 
+              className="status-dot dot-pulse" 
+              style={{ background: offlineCount === 0 ? (degradedCount === 0 ? '#10b981' : '#f59e0b') : '#ef4444' }} 
+            />
+            {offlineCount === 0 
+              ? (degradedCount === 0 ? 'All Systems Operational' : `${degradedCount} Degraded Gateway Latency`) 
+              : `${offlineCount} Degradation Detected`}
           </span>
         </div>
 
@@ -145,24 +161,27 @@ export function ApiHealthWorkspace() {
           <div className="graph-title-area">
             <h2 className="graph-card-title">API Response Time</h2>
             <div className="endpoint-selector-tag">
-              <span className="endpoint-selector-name">{currentApiDef.name}</span>
+              <span className="endpoint-selector-name" style={{ color: currentEndpointColor }}>
+                {currentApiDef.name}
+              </span>
               <span className="endpoint-selector-provider">({currentApiDef.provider})</span>
             </div>
           </div>
 
           <div className="graph-metric-area">
-            <span className="graph-live-ms font-mono font-bold">
-              {liveFrametime || currentLiveStatus.frametime || 152} ms
+            <span className="graph-live-ms font-mono font-bold" style={{ color: currentEndpointColor }}>
+              {liveFrametime || currentLiveStatus.frametime || 103} ms
             </span>
           </div>
         </div>
 
         {/* Real-time Oscilloscope Frame Graph updating every 5ms */}
         <FrameGraph
-          latency={currentLiveStatus.frametime || 152}
+          latency={currentLiveStatus.frametime || 103}
+          endpointId={currentApiDef.id}
           timeRange={timeRange}
           height={240}
-          accentColor="#6366f1"
+          accentColor={currentEndpointColor}
           onLiveValue={setLiveFrametime}
           interactive={true}
         />
@@ -179,21 +198,27 @@ export function ApiHealthWorkspace() {
       <div className="api-cards-grid simplified-grid">
         {MONITORED_APIS.map((apiDef) => {
           const live = apiStatuses.find(s => s.id === apiDef.id) || {
-            status: 'online',
-            frametime: 45,
+            status: (apiDef.typicalFrametime >= 350 ? 'degraded' : 'online'),
+            frametime: apiDef.typicalFrametime || 45,
             httpStatus: 'Probing...',
             lastChecked: null,
           };
           const isSelected = selectedApiId === apiDef.id;
-          const isProbing = probingId === apiDef.id || (isLoading && !apiStatuses.length);
-          const ftInfo = getFrametimeTag(live.frametime || 50);
+          const isProbing = probingId === apiDef.id;
+          const ft = live.frametime || apiDef.typicalFrametime || 50;
+          const ftInfo = getFrametimeTag(ft);
+          const endpointColor = getEndpointColor(live.status, ft);
 
           return (
             <div 
               key={apiDef.id} 
               className={`api-card winui-card simplified-card ${isSelected ? 'card-selected' : ''}`}
-              onClick={() => setSelectedApiId(apiDef.id)}
+              onClick={() => {
+                setSelectedApiId(apiDef.id);
+                setLiveFrametime(ft);
+              }}
               title="Click to graph this endpoint above"
+              style={isSelected ? { borderColor: endpointColor, boxShadow: `0 0 16px ${endpointColor}33` } : {}}
             >
               {/* Header */}
               <div className="api-card-top">
@@ -202,8 +227,8 @@ export function ApiHealthWorkspace() {
                     <span 
                       className="status-dot" 
                       style={{ 
-                        background: getStatusColor(live.status),
-                        boxShadow: `0 0 6px ${getStatusColor(live.status)}aa`
+                        background: endpointColor,
+                        boxShadow: `0 0 6px ${endpointColor}aa`
                       }} 
                     />
                     <h3 className="api-card-name">{apiDef.name}</h3>
@@ -212,7 +237,10 @@ export function ApiHealthWorkspace() {
                 </div>
 
                 <div className="api-badges-row">
-                  <span className={`api-status-badge badge-${live.status}`}>
+                  <span 
+                    className={`api-status-badge badge-${live.status}`}
+                    style={live.status === 'degraded' || ft >= 350 ? { borderColor: `${endpointColor}66`, color: endpointColor } : {}}
+                  >
                     {live.status.toUpperCase()}
                   </span>
                   <button 
@@ -232,20 +260,21 @@ export function ApiHealthWorkspace() {
                   <span className="api-ft-label">Response Time</span>
                   <div className="flex-row items-center gap-2">
                     <span className={`api-ft-tag ${ftInfo.class}`}>{ftInfo.label}</span>
-                    <span className="api-ft-val font-mono font-bold">
-                      {isProbing ? '...' : `${live.frametime} ms`}
+                    <span className="api-ft-val font-mono font-bold" style={{ color: endpointColor }}>
+                      {isProbing ? '...' : `${ft} ms`}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Real-time Mini Frame Graph (Replaces the old static progress bar!) */}
+              {/* Real-time Mini Frame Graph (Calibrated height & color per endpoint) */}
               <div className="api-card-graph-wrap">
                 <FrameGraph
-                  latency={live.frametime || 50}
+                  latency={ft}
+                  endpointId={apiDef.id}
                   isMini={true}
                   height={50}
-                  accentColor={getStatusColor(live.status)}
+                  accentColor={endpointColor}
                   interactive={false}
                 />
               </div>

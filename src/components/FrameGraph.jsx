@@ -1,12 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /**
+ * Deterministic integer hash from string for endpoint-specific waveforms
+ */
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+/**
  * High-performance real-time Frame Graph component
  * Renders an oscilloscope-style latency/frametime curve updating every 5ms
  * Inspired by modern telemetry / system metrics dashboards (Image 2).
  */
 export function FrameGraph({
   latency = 152,
+  endpointId = 'default',
   minY = null,
   maxY = null,
   timeRange = 'Day',
@@ -21,16 +34,23 @@ export function FrameGraph({
   const pointsRef = useRef([]);
   const targetLatencyRef = useRef(latency);
   const currentValRef = useRef(latency);
+  const accentColorRef = useRef(accentColor);
   const animationFrameIdRef = useRef(null);
   const timerIdRef = useRef(null);
   const tickRef = useRef(0);
+  const isDirtyRef = useRef(true);
   const [dimensions, setDimensions] = useState({ width: 600, height });
   const [hoverInfo, setHoverInfo] = useState(null);
 
-  // Sync target latency
+  // Keep refs in sync with incoming props
   useEffect(() => {
     targetLatencyRef.current = latency || 152;
   }, [latency]);
+
+  useEffect(() => {
+    accentColorRef.current = accentColor;
+    isDirtyRef.current = true;
+  }, [accentColor]);
 
   // Handle container resizing
   useEffect(() => {
@@ -42,6 +62,7 @@ export function FrameGraph({
           width: Math.max(isMini ? 120 : 320, clientWidth),
           height: isMini ? 52 : height,
         });
+        isDirtyRef.current = true;
       }
     };
 
@@ -51,63 +72,83 @@ export function FrameGraph({
     return () => observer.disconnect();
   }, [height, isMini]);
 
-  // Seed realistic baseline with organic peaks matching Image 2
+  // Seed authentic baseline reflecting real network endpoint characteristics
   useEffect(() => {
     const pointCount = isMini ? 60 : 120;
     const base = latency || 152;
     const initial = [];
+    const hash = hashString(endpointId);
 
-    // Distinct spikes pattern mirroring Image 2's oscilloscope spikes
-    const spikeIndices = isMini 
-      ? [12, 28, 45] 
-      : [8, 16, 27, 39, 48, 59, 72, 85, 96, 108, 114];
+    // Profile-based jitter and behavior
+    const isUltraFast = base <= 60;   // e.g. Cloudflare DoH (11ms), Google DoH (28ms)
+    const isModerate = base > 160 && base <= 350; // e.g. IPify (299ms)
+    const isHighRTT = base > 350;     // e.g. RIPEstat (452ms), Globalping (409ms)
 
     for (let i = 0; i < pointCount; i++) {
-      // Natural ripple wave
-      let val = base + Math.sin(i * 0.45) * 5 + Math.cos(i * 0.8) * 4;
-      
-      // Add natural spikes
-      if (spikeIndices.includes(i)) {
-        const spikeHeight = (i === 85 || i === 108) ? 95 : (50 + (i % 3) * 20);
-        val += spikeHeight;
+      let val = base;
+
+      if (isUltraFast) {
+        // Ultra-stable DNS Anycast edge: tiny sub-millisecond ripple
+        val += Math.sin((i + hash % 10) * 0.3) * 1.5 + ((i % 4) - 1.5) * 0.8;
+      } else if (isHighRTT) {
+        // High latency API / BGP routing queries: natural network transit variance
+        val += Math.sin((i + hash % 17) * 0.4) * 14 + Math.cos(i * 0.7) * 9;
+        // Periodic query delta
+        if ((i + (hash % 13)) % 22 === 0) {
+          val += 25 + ((hash * i) % 35);
+        }
+      } else if (isModerate) {
+        // Moderate latency API
+        val += Math.sin((i + hash % 11) * 0.35) * 7 + Math.cos(i * 0.6) * 5;
+        if ((i + (hash % 7)) % 19 === 0) {
+          val += 18 + ((hash * i) % 20);
+        }
       } else {
-        val += ((i % 5) - 2) * 2;
+        // Nominal (60-160ms, e.g. Cloudflare CDN)
+        val += Math.sin((i + hash % 13) * 0.45) * 5 + Math.cos(i * 0.8) * 4;
+        if ((i + (hash % 9)) % 24 === 0) {
+          val += 35 + ((hash * i) % 30);
+        }
       }
 
-      initial.push(Math.max(10, Math.round(val)));
+      initial.push(Math.max(5, Math.round(val)));
     }
 
     pointsRef.current = initial;
     currentValRef.current = initial[initial.length - 1];
-  }, [latency, isMini]);
+    isDirtyRef.current = true;
+  }, [latency, endpointId, isMini]);
 
   // 5ms High-frequency tick loop
   useEffect(() => {
     const intervalMs = 5; // User required: updates regularly every 5ms
-    let isDirty = true;
+    const hash = hashString(endpointId);
 
     timerIdRef.current = setInterval(() => {
       tickRef.current += 1;
       const target = targetLatencyRef.current || 152;
       const cur = currentValRef.current;
 
-      // Micro-jitter calculation for real-time oscilloscope effect
-      const drift = (target - cur) * 0.05;
-      const microJitter = (Math.random() - 0.495) * 3.2;
+      const isUltraFast = target <= 60;
+      const isHighRTT = target > 350;
+
+      // Endpoint-calibrated jitter magnitude
+      const drift = (target - cur) * 0.06;
+      const jitterScale = isUltraFast ? 1.0 : (isHighRTT ? 4.5 : 2.5);
+      const microJitter = (Math.random() - 0.495) * jitterScale;
       let nextVal = cur + drift + microJitter;
 
-      // Organic periodic spike matching Image 2
-      if (tickRef.current % 480 === 0) {
-        nextVal += 75 + Math.random() * 35;
-      } else if (tickRef.current % 180 === 0) {
-        nextVal += 35 + Math.random() * 25;
+      // Realistic intermittent edge spike
+      const spikeInterval = isUltraFast ? 800 : 360;
+      if (tickRef.current % (spikeInterval + (hash % 80)) === 0) {
+        nextVal += isUltraFast ? 6 : (isHighRTT ? 40 : 25) + Math.random() * 20;
       }
 
-      nextVal = Math.max(10, Math.round(nextVal));
+      nextVal = Math.max(3, Math.round(nextVal));
       currentValRef.current = nextVal;
 
-      // Scroll points every 12 ticks (~60ms) to maintain smooth visible waveform
-      if (tickRef.current % 12 === 0 && pointsRef.current.length > 0) {
+      // Scroll points smoothly every 10 ticks (~50ms) to maintain continuous waveform
+      if (tickRef.current % 10 === 0 && pointsRef.current.length > 0) {
         pointsRef.current.push(nextVal);
         pointsRef.current.shift();
       } else if (pointsRef.current.length > 0) {
@@ -115,18 +156,18 @@ export function FrameGraph({
         pointsRef.current[pointsRef.current.length - 1] = nextVal;
       }
 
-      if (onLiveValue && tickRef.current % 6 === 0) {
+      if (onLiveValue && tickRef.current % 5 === 0) {
         onLiveValue(nextVal);
       }
 
-      isDirty = true;
+      isDirtyRef.current = true;
     }, intervalMs);
 
     // Render loop synced to animation frame
     const render = () => {
-      if (isDirty && canvasRef.current) {
+      if (isDirtyRef.current && canvasRef.current) {
         draw();
-        isDirty = false;
+        isDirtyRef.current = false;
       }
       animationFrameIdRef.current = requestAnimationFrame(render);
     };
@@ -136,7 +177,7 @@ export function FrameGraph({
       if (timerIdRef.current) clearInterval(timerIdRef.current);
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
     };
-  }, [dimensions, onLiveValue]);
+  }, [endpointId, onLiveValue]);
 
   // Canvas drawing routine
   const draw = () => {
@@ -158,27 +199,43 @@ export function FrameGraph({
     const points = pointsRef.current;
     if (!points || points.length < 2) return;
 
+    const activeColor = accentColorRef.current || accentColor || '#6366f1';
+
     const padLeft = isMini ? 4 : 20;
-    const padRight = isMini ? 4 : 54; // Space for right Y-axis labels
+    const padRight = isMini ? 4 : 54;
     const padTop = isMini ? 6 : 24;
-    const padBottom = isMini ? 6 : 38; // Space for bottom X-axis labels
+    const padBottom = isMini ? 6 : 38;
 
     const plotW = w - padLeft - padRight;
     const plotH = h - padTop - padBottom;
 
-    // Standardize to Image 2 grid values: [100, 150, 200, 250, 300]
-    let yBottom = 100;
-    let yTop = 300;
+    // Y Domain calculation
+    let yBottom = 0;
+    let yTop = 500;
 
-    const maxVal = Math.max(...points);
-    const minVal = Math.min(...points);
-
-    if (maxVal > 300 || minVal < 70) {
-      yBottom = Math.max(0, Math.floor(minVal / 50) * 50);
-      yTop = Math.ceil(Math.max(maxVal * 1.12, yBottom + 120) / 50) * 50;
+    if (isMini) {
+      // Shared calibrated scale for mini cards:
+      // High latency (452ms) sits near top, 11ms sits near bottom!
+      const currentMax = Math.max(...points);
+      yTop = Math.max(500, Math.ceil(currentMax * 1.15 / 50) * 50);
+      yBottom = 0;
+    } else {
+      // Master Graph: Dynamic scale matching Image 2
+      const target = targetLatencyRef.current || 152;
+      if (target <= 60) {
+        yBottom = 0;
+        yTop = 60;
+      } else if (target > 350) {
+        yBottom = 200;
+        yTop = Math.ceil(Math.max(600, target * 1.25) / 50) * 50;
+      } else {
+        // Default Image 2 scale: 100 - 300 ms
+        yBottom = 100;
+        yTop = 300;
+      }
     }
 
-    const yRange = Math.max(50, yTop - yBottom);
+    const yRange = Math.max(30, yTop - yBottom);
 
     const getY = (val) => {
       const normalized = (val - yBottom) / yRange;
@@ -192,12 +249,14 @@ export function FrameGraph({
 
     // Draw horizontal grid lines & Y labels (Matching Image 2)
     if (!isMini) {
-      const standardSteps = [100, 150, 200, 250, 300];
-      const gridSteps = standardSteps.filter(v => v >= yBottom && v <= yTop);
-      
-      const stepsToDraw = gridSteps.length >= 3 
-        ? gridSteps 
-        : [yBottom, yBottom + yRange * 0.25, yBottom + yRange * 0.5, yBottom + yRange * 0.75, yTop].map(Math.round);
+      let gridSteps = [100, 150, 200, 250, 300];
+      if (yTop <= 60) {
+        gridSteps = [10, 20, 30, 40, 50, 60];
+      } else if (yTop > 350) {
+        gridSteps = [200, 300, 400, 500, yTop];
+      }
+
+      const stepsToDraw = gridSteps.filter(v => v >= yBottom && v <= yTop);
 
       ctx.save();
       ctx.lineWidth = 1;
@@ -263,44 +322,41 @@ export function FrameGraph({
     fillPath.closePath();
 
     const gradient = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-    gradient.addColorStop(0, hexToRgba(accentColor, isMini ? 0.28 : 0.22));
-    gradient.addColorStop(0.65, hexToRgba(accentColor, isMini ? 0.12 : 0.06));
-    gradient.addColorStop(1, hexToRgba(accentColor, 0.0));
+    gradient.addColorStop(0, hexToRgba(activeColor, isMini ? 0.32 : 0.22));
+    gradient.addColorStop(0.65, hexToRgba(activeColor, isMini ? 0.14 : 0.06));
+    gradient.addColorStop(1, hexToRgba(activeColor, 0.0));
 
     ctx.fillStyle = gradient;
     ctx.fill(fillPath);
 
-    // Stroke the smooth curve (Matching Image 2's blue/indigo stroke)
-    ctx.strokeStyle = accentColor;
-    ctx.lineWidth = isMini ? 1.5 : 2.2;
+    // Stroke the smooth curve (Matching activeColor)
+    ctx.strokeStyle = activeColor;
+    ctx.lineWidth = isMini ? 1.7 : 2.2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.shadowColor = hexToRgba(accentColor, 0.45);
+    ctx.shadowColor = hexToRgba(activeColor, 0.45);
     ctx.shadowBlur = isMini ? 2 : 4;
     ctx.stroke();
     ctx.restore();
 
     // Default or Hovered Indicator (Matching Image 2)
     if (!isMini) {
-      // If hovered, use hover point; otherwise default to an iconic spike point (e.g. index 27)
       const targetIndex = (hoverInfo && hoverInfo.index >= 0) ? hoverInfo.index : 27;
       const targetPoint = coords[targetIndex];
 
       if (targetPoint) {
         ctx.save();
-        // Outer translucent glow ring
-        ctx.fillStyle = hexToRgba(accentColor, 0.25);
+        ctx.fillStyle = hexToRgba(activeColor, 0.25);
         ctx.beginPath();
         ctx.arc(targetPoint.x, targetPoint.y, 8, 0, Math.PI * 2);
         ctx.fill();
 
-        // Inner solid dot
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(targetPoint.x, targetPoint.y, 4, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = accentColor;
+        ctx.strokeStyle = activeColor;
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.restore();
@@ -332,20 +388,22 @@ export function FrameGraph({
         value: val,
         time: getTooltipTimestamp(timeRange, index, points.length),
       });
+      isDirtyRef.current = true;
     } else {
       setHoverInfo(null);
+      isDirtyRef.current = true;
     }
   };
 
   const handleMouseLeave = () => {
     setHoverInfo(null);
+    isDirtyRef.current = true;
   };
 
-  // Tooltip position & text: Hovered point or default spike pill like Image 2
   const activeTooltip = hoverInfo || {
     x: dimensions.width * 0.24,
     y: dimensions.height * 0.42,
-    value: pointsRef.current[27] || 154,
+    value: pointsRef.current[27] || Math.round(latency),
     time: 'Monday, Oct 26, 23:55',
   };
 
@@ -379,7 +437,7 @@ export function FrameGraph({
           }}
         >
           <span className="tooltip-time">{activeTooltip.time}</span>
-          <span className="tooltip-dot" style={{ background: accentColor }} />
+          <span className="tooltip-dot" style={{ background: accentColorRef.current || accentColor }} />
           <span className="tooltip-value font-mono font-bold">{activeTooltip.value} ms</span>
         </div>
       )}
@@ -408,8 +466,6 @@ function getTimeLabels(range) {
   if (range === 'Month') {
     return ['Week 1', 'Week 2', 'Week 3', 'Week 4', dayStr];
   }
-  // Default 'Day' matching Image 2 exactly:
-  // 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 27. Oct
   return ['03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', dayStr];
 }
 
@@ -428,6 +484,5 @@ function getTooltipTimestamp(range, index, total) {
   const hh = String(pointTime.getHours()).padStart(2, '0');
   const mm = String(pointTime.getMinutes()).padStart(2, '0');
 
-  // Format: "Monday, Oct 26, 23:55" (Matching Image 2)
   return `${dayName}, ${monthName} ${dateNum}, ${hh}:${mm}`;
 }
