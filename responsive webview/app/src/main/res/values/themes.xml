@@ -1,0 +1,13 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme -->
+    <style name="Theme.NetPulse" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/accent_brand_bright</item>
+        <item name="colorPrimaryVariant">@color/accent_brand</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/bg_obsidian</item>
+        <item name="android:navigationBarColor">@color/bg_obsidian</item>
+        <item name="android:windowBackground">@color/bg_obsidian</item>
+    </style>
+</resources>

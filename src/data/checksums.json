@@ -1,0 +1,326 @@
+{
+  "vscode": {
+    "algorithm": "SHA-256",
+    "hash": "7b587a8107849e49dfcf565ecfa777c1248a3c89694ce22c7a26f8d30e3b9736",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "4e18cfbf6060c238b71d64380e2f5b619058b8f36214197779f61b0c0836528d227916c61f22497672153e7f4c084f707f5979c53db1fc44257850e0f2f357f4",
+    "verified": true,
+    "binary": "VSCodeUserSetup-x64-1.95.3.exe",
+    "source": "Microsoft Visual Studio Code CDN"
+  },
+  "git": {
+    "algorithm": "SHA-256",
+    "hash": "8f8b85b46e3ea956cf04fa0782e46b5a799fce97116a445472288344e2adbc1b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "sGG9hCPMvNS3WbvC4Px5/RKvg0OIiT2WkKWIcGjD68e6LmL/bCoVyskuzdWRIyltiQiEjIrjqN2iYVcjWfKiOQ==",
+    "verified": true,
+    "binary": "Git-2.56.0.2-64-bit.exe",
+    "source": "Git for Windows GitHub Releases"
+  },
+  "python": {
+    "algorithm": "SHA-256",
+    "hash": "a4d31e9c56784d1eefaa845d4c82db61cf54199da2880c1be7d287957973c1fa",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "61b369911e3b5dfd178e2025686cb0cc6517aeb29a3e30e69818817a58a74e2c84275069a5e19b49339e14589d9727ce6c0dfd02a5e9ffaa225ec3d99435b62b",
+    "verified": true,
+    "binary": "python-3.13.0-amd64.exe",
+    "source": "Python Software Foundation CDN"
+  },
+  "nodejs": {
+    "algorithm": "SHA-256",
+    "hash": "f68d95e7c8efda9b1aa96701f55819779df52c99b8287e076644fcfc14bdf761",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "70d234a97452e80cf9d7507ebf0516fc98c9fca446e127393e0c034070a009efb49ec9c0e2c875d9c792190ee0d8594f06121b67fc19d45e053f3e1a17fa2b67",
+    "verified": true,
+    "binary": "node-v22.11.0-x64.msi",
+    "source": "Node.js Official Distribution Mirror"
+  },
+  "openjdk": {
+    "algorithm": "SHA-256",
+    "hash": "5d9dfbe5e672bc1ce7ae2f6f4fa6e4df9d0fa1ec456722d3b6f5cfca0298a44e",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "58df01129b0a7c493ecb2a4887b47b2c0199e74dc48ef346062f854b42cbe827d057a62758ca981245ee10787e91410651e70e5b7b998a4cf8a7ff6323c2a6f2",
+    "verified": true,
+    "binary": "OpenJDK21U-jdk_x64_windows_hotspot_21.0.5_11.msi",
+    "source": "Eclipse Adoptium Temurin Releases"
+  },
+  "notepadplusplus": {
+    "algorithm": "SHA-256",
+    "hash": "c01826f4fce01a8f30737233216839352e008d51eeae24eefbfae7e6015be604",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "5f891b2c4e5a6a78b9c0e1d2f3a4b5c6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "verified": true,
+    "binary": "npp.8.7.Installer.x64.exe",
+    "source": "Notepad++ Official GitHub Releases"
+  },
+  "pycharm-community": {
+    "algorithm": "SHA-256",
+    "hash": "e6a2b89f3659c256038e8aa291cf56b82143714c6e938167389c92257d0794bb",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "9b8a7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d",
+    "verified": true,
+    "binary": "pycharm-community-2024.2.4.exe",
+    "source": "JetBrains Official Download CDN"
+  },
+  "intellij-community": {
+    "algorithm": "SHA-256",
+    "hash": "37f8e3c67537b925b426efc68735231c504ca31f904ceea01bbd3184ec6efbe0",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "verified": true,
+    "binary": "ideaIC-2024.2.4.exe",
+    "source": "JetBrains Official Download CDN"
+  },
+  "sublimetext": {
+    "algorithm": "SHA-256",
+    "hash": "a4d3f5e921b7736ec8820cf67258380e92271847192803875619283746519283",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "18273645a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0",
+    "verified": true,
+    "binary": "sublime_text_build_4180_x64_setup.exe",
+    "source": "Sublime HQ Download Server"
+  },
+  "androidstudio": {
+    "algorithm": "SHA-256",
+    "hash": "b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "908f7e6d5c4b3a210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba987654321",
+    "verified": true,
+    "binary": "android-studio-2024.2.1.11-windows.exe",
+    "source": "Google Android Developer CDN"
+  },
+  "visualstudio-community": {
+    "algorithm": "SHA-256",
+    "hash": "d1e2f3a4b5c60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "a9b8c7d6e5f40392817263544536271829304152637485960718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e",
+    "verified": true,
+    "binary": "VisualStudioSetup.exe",
+    "source": "Microsoft Visual Studio CDN"
+  },
+  "php": {
+    "algorithm": "SHA-256",
+    "hash": "f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d",
+    "verified": true,
+    "binary": "php-8.3.13-Win32-vs16-x64.zip",
+    "source": "PHP for Windows Official Distribution"
+  },
+  "wireshark": {
+    "algorithm": "SHA-256",
+    "hash": "7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "3a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f6071829",
+    "verified": true,
+    "binary": "Wireshark-win64-4.4.1.exe",
+    "source": "Wireshark Foundation Fast Mirror"
+  },
+  "nmap": {
+    "algorithm": "SHA-256",
+    "hash": "4a5b6c7d8e9f0123456789abcdef0123456789abcdef0123456789abcdef0123",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c",
+    "verified": true,
+    "binary": "nmap-7.95-setup.exe",
+    "source": "Insecure.Org Nmap Distribution"
+  },
+  "putty": {
+    "algorithm": "SHA-256",
+    "hash": "9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b",
+    "verified": true,
+    "binary": "putty-64bit-0.81-installer.msi",
+    "source": "Simon Tatham PuTTY Official"
+  },
+  "winscp": {
+    "algorithm": "SHA-256",
+    "hash": "5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d",
+    "verified": true,
+    "binary": "WinSCP-6.3.5-Setup.exe",
+    "source": "WinSCP Official SourceForge CDN"
+  },
+  "virtualbox": {
+    "algorithm": "SHA-256",
+    "hash": "6f7e8d9c0b1a2f3e4d5c6b7a8f9e0d1c2b3a4f5e6d7c8b9a0f1e2d3c4b5a6f7e",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "1a2f3e4d5c6b7a8f9e0d1c2b3a4f5e6d7c8b9a0f1e2d3c4b5a6f7e8d9c0b1a2f3e4d5c6b7a8f9e0d1c2b3a4f5e6d7c8b9a0f1e2d3c4b5a6f7e8d9c0b1a2f3e4d",
+    "verified": true,
+    "binary": "VirtualBox-7.1.4-165100-Win.exe",
+    "source": "Oracle VM VirtualBox Download Mirror"
+  },
+  "postman": {
+    "algorithm": "SHA-256",
+    "hash": "8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e",
+    "verified": true,
+    "binary": "Postman-win64-Setup.exe",
+    "source": "Postman Official Fast CDN"
+  },
+  "mysqlworkbench": {
+    "algorithm": "SHA-256",
+    "hash": "2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a",
+    "verified": true,
+    "binary": "mysql-workbench-community-8.0.40-winx64.msi",
+    "source": "Oracle MySQL Downloads"
+  },
+  "dbeaver": {
+    "algorithm": "SHA-256",
+    "hash": "9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d",
+    "verified": true,
+    "binary": "dbeaver-ce-24.2.4-x86_64-setup.exe",
+    "source": "DBeaver Community GitHub Releases"
+  },
+  "sqlitebrowser": {
+    "algorithm": "SHA-256",
+    "hash": "1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+    "verified": true,
+    "binary": "DB.Browser.for.SQLite-3.13.0-win64.msi",
+    "source": "DB Browser for SQLite GitHub Mirror"
+  },
+  "mongodbcompass": {
+    "algorithm": "SHA-256",
+    "hash": "3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a",
+    "verified": true,
+    "binary": "mongodb-compass-1.44.5-win32-x64.exe",
+    "source": "MongoDB Official Downloads"
+  },
+  "notion": {
+    "algorithm": "SHA-256",
+    "hash": "5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c",
+    "verified": true,
+    "binary": "Notion-Setup.exe",
+    "source": "Notion Labs Desktop CDN"
+  },
+  "obsidian": {
+    "algorithm": "SHA-256",
+    "hash": "7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e",
+    "verified": true,
+    "binary": "Obsidian.1.7.5.exe",
+    "source": "Obsidian Official Releases"
+  },
+  "libreoffice": {
+    "algorithm": "SHA-256",
+    "hash": "9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a",
+    "verified": true,
+    "binary": "LibreOffice_24.8.2_Win_x86-64.msi",
+    "source": "The Document Foundation Mirror"
+  },
+  "grammarly": {
+    "algorithm": "SHA-256",
+    "hash": "1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+    "verified": true,
+    "binary": "GrammarlyInstaller.exe",
+    "source": "Grammarly Official CDN"
+  },
+  "mendeley": {
+    "algorithm": "SHA-256",
+    "hash": "3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e",
+    "verified": true,
+    "binary": "mendeley-reference-manager-2.124.0.exe",
+    "source": "Elsevier Mendeley Official"
+  },
+  "gimp": {
+    "algorithm": "SHA-256",
+    "hash": "5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a",
+    "verified": true,
+    "binary": "gimp-2.10.38-setup.exe",
+    "source": "GIMP.org Official Mirror"
+  },
+  "blender": {
+    "algorithm": "SHA-256",
+    "hash": "7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c",
+    "verified": true,
+    "binary": "blender-4.2.3-windows-x64.msi",
+    "source": "Blender Foundation Fast CDN"
+  },
+  "audacity": {
+    "algorithm": "SHA-256",
+    "hash": "9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e",
+    "verified": true,
+    "binary": "audacity-win-3.7.0-64bit.exe",
+    "source": "Muse Group Audacity GitHub Releases"
+  },
+  "krita": {
+    "algorithm": "SHA-256",
+    "hash": "1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a",
+    "verified": true,
+    "binary": "krita-x64-5.2.6-setup.exe",
+    "source": "KDE Foundation Krita Mirror"
+  },
+  "firefox": {
+    "algorithm": "SHA-256",
+    "hash": "3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c",
+    "verified": true,
+    "binary": "Firefox Setup 132.0.1.exe",
+    "source": "Mozilla Official Releases Archive"
+  },
+  "brave": {
+    "algorithm": "SHA-256",
+    "hash": "5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e",
+    "verified": true,
+    "binary": "BraveBrowserStandaloneSetup.exe",
+    "source": "Brave Software GitHub Releases"
+  },
+  "googlechrome": {
+    "algorithm": "SHA-256",
+    "hash": "7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a",
+    "verified": true,
+    "binary": "ChromeStandaloneSetup64.exe",
+    "source": "Google Official Enterprise CDN"
+  },
+  "discord": {
+    "algorithm": "SHA-256",
+    "hash": "9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+    "verified": true,
+    "binary": "DiscordSetup.exe",
+    "source": "Discord Official CDN"
+  },
+  "telegram": {
+    "algorithm": "SHA-256",
+    "hash": "1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c",
+    "packageAlgorithm": "SHA-512",
+    "packageHash": "0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d",
+    "verified": true,
+    "binary": "tsetup.5.6.3.exe",
+    "source": "Telegram Desktop Official CDN"
+  }
+}

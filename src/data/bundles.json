@@ -1,0 +1,37 @@
+[
+  {
+    "id": "first-year",
+    "name": "First-Year Programming Starter",
+    "description": "Essential development environment for fresh Computer Studies and IT freshmen.",
+    "packageIds": ["vscode", "git", "python", "notepadplusplus"],
+    "badge": "Freshman Recommended"
+  },
+  {
+    "id": "web-dev",
+    "name": "Full-Stack Web Development",
+    "description": "Complete setup for front-end, back-end, and REST API development courses.",
+    "packageIds": ["vscode", "git", "nodejs", "postman", "firefox"],
+    "badge": "Web Courses"
+  },
+  {
+    "id": "networking-cyber",
+    "name": "Networking & Cybersecurity Lab",
+    "description": "Packet capture, network diagnostics, virtual labs, and secure terminal tools.",
+    "packageIds": ["wireshark", "nmap", "putty", "virtualbox"],
+    "badge": "Cisco / Cyber"
+  },
+  {
+    "id": "database-systems",
+    "name": "Database Management & SQL",
+    "description": "Visual querying tools for relational databases and document stores.",
+    "packageIds": ["mysqlworkbench", "dbeaver", "sqlitebrowser"],
+    "badge": "DBMS Course"
+  },
+  {
+    "id": "academic-productivity",
+    "name": "Academic Research & Notes",
+    "description": "Digital workspace, reference managers, markdown notes, and office utilities.",
+    "packageIds": ["notion", "obsidian", "libreoffice", "mendeley"],
+    "badge": "Study & Thesis"
+  }
+]

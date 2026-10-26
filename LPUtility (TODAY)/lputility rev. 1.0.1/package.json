@@ -1,0 +1,38 @@
+{
+  "name": "lputility",
+  "version": "1.0.0",
+  "description": "LPUtility - A electron based application for students that provides All-In-One Software and Utilities Commonly used in Academics and IT",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron": "vite build && electron electron/main.cjs",
+    "electron:dev": "electron electron/main.cjs",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "lputility",
+    "chocolatey",
+    "winui",
+    "mica",
+    "subnetting",
+    "ipv6",
+    "scheduler"
+  ],
+  "author": "LPU Cavite BSIT - Group 1",
+  "license": "MIT",
+  "dependencies": {
+    "lucide-react": "^1.16.0",
+    "mica-electron": "^1.5.17",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^34.0.0",
+    "vite": "^6.1.1",
+    "vitest": "^3.0.6"
+  }
+}

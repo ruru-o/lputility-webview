@@ -1,0 +1,38 @@
+{
+  "name": "lputility",
+  "version": "2.0.0",
+  "description": "LPUtility - Network Diagnostics, Infrastructure Intelligence & Utilities",
+  "type": "module",
+  "main": "src/main.jsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "lputility",
+    "network-diagnostics",
+    "ping",
+    "dns",
+    "traceroute",
+    "ipv4",
+    "ipv6",
+    "winui",
+    "webview"
+  ],
+  "author": "LPUtility Team",
+  "license": "MIT",
+  "dependencies": {
+    "lucide-react": "^1.16.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "puppeteer-core": "^24.4.0",
+    "vite": "^6.1.1",
+    "vitest": "^3.0.6"
+  }
+}
