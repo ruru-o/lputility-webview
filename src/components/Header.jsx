@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X, Activity } from 'lucide-react';
+import { Menu, X, Gauge } from 'lucide-react';
 
 export function Header({ 
   onToggleMobileMenu, 
@@ -17,7 +17,7 @@ export function Header({
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        <div className="header-brand" onClick={() => onQuickNavigate('diagnostics')}>
+        <div className="header-brand" onClick={() => onQuickNavigate('bufferbloat')}>
           <div className="header-logo">LP</div>
           <span className="header-title">LPUtility</span>
         </div>
@@ -26,10 +26,10 @@ export function Header({
       <div className="header-right">
         <button 
           className="header-action-btn"
-          onClick={() => onQuickNavigate('diagnostics')}
+          onClick={() => onQuickNavigate('bufferbloat')}
         >
-          <Activity size={14} />
-          <span>New Test</span>
+          <Gauge size={14} />
+          <span>Bufferbloat Test</span>
         </button>
       </div>
     </header>

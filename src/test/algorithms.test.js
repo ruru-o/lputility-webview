@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { calculateSubnet, splitSubnet, isValidIpv4 } from '../utils/ipv4';
 import { calculateIpv6, parseAndExpandIpv6, compressIpv6, classifyIpv6, ipv6ToBigInt } from '../utils/ipv6';
 import { calculateEntropy, evaluateStrength, generateSecurePassword } from '../utils/crypto';
+import { calculateBufferbloatGrade } from '../services/bufferbloatService';
 
 describe('IPv4 Subnetting Algorithms', () => {
   it('correctly calculates /24 subnet boundaries', () => {
@@ -108,5 +109,49 @@ describe('Password Generator', () => {
   it('flags passwords under 15 characters per NIST SP 800-63B', () => {
     expect(generateSecurePassword({ length: 12 }).isNistCompliant).toBe(false);
     expect(generateSecurePassword({ length: 16 }).isNistCompliant).toBe(true);
+  });
+});
+
+describe('Bufferbloat Grading Engine (Waveform Equivalent)', () => {
+  it('assigns Grade A+ when latency delta is 0 to 5ms', () => {
+    const res = calculateBufferbloatGrade(15, 18, 19);
+    expect(res.grade).toBe('A+');
+    expect(res.maxDelta).toBe(4);
+    expect(res.ratings.gaming).toBe('Flawless');
+  });
+
+  it('assigns Grade A when latency delta is 6 to 15ms', () => {
+    const res = calculateBufferbloatGrade(20, 31, 28);
+    expect(res.grade).toBe('A');
+    expect(res.maxDelta).toBe(11);
+    expect(res.ratings.gaming).toBe('Excellent');
+  });
+
+  it('assigns Grade B when latency delta is 16 to 40ms', () => {
+    const res = calculateBufferbloatGrade(25, 55, 45);
+    expect(res.grade).toBe('B');
+    expect(res.maxDelta).toBe(30);
+    expect(res.ratings.gaming).toBe('Good');
+  });
+
+  it('assigns Grade C when latency delta is 41 to 100ms', () => {
+    const res = calculateBufferbloatGrade(20, 105, 70);
+    expect(res.grade).toBe('C');
+    expect(res.maxDelta).toBe(85);
+    expect(res.ratings.gaming).toBe('Fair');
+  });
+
+  it('assigns Grade D when latency delta is 101 to 300ms', () => {
+    const res = calculateBufferbloatGrade(25, 210, 180);
+    expect(res.grade).toBe('D');
+    expect(res.maxDelta).toBe(185);
+    expect(res.ratings.gaming).toBe('Frequent Lag');
+  });
+
+  it('assigns Grade F when latency delta exceeds 300ms', () => {
+    const res = calculateBufferbloatGrade(30, 480, 320);
+    expect(res.grade).toBe('F');
+    expect(res.maxDelta).toBe(450);
+    expect(res.ratings.gaming).toBe('Unplayable Under Load');
   });
 });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Activity, 
+  Gauge, 
   Layers, 
   Network, 
   Globe2, 
@@ -19,7 +19,7 @@ export function Sidebar({
   closeMobileMenu
 }) {
   const navItems = [
-    { id: 'diagnostics', label: 'Network Diagnostics', icon: Activity },
+    { id: 'bufferbloat', label: 'Bufferbloat Test', icon: Gauge },
     { id: 'tools', label: 'All Tools', icon: Layers },
     { id: 'ipv4', label: 'IPv4 Subnets', icon: Network },
     { id: 'ipv6', label: 'IPv6 Calculator', icon: Globe2 },
@@ -44,7 +44,7 @@ export function Sidebar({
         <div className="sidebar-top">
           <div className="sidebar-header">
             {!isCollapsed && (
-              <div className="brand-badge" onClick={() => handleNavClick('diagnostics')}>
+              <div className="brand-badge" onClick={() => handleNavClick('bufferbloat')}>
                 <div className="brand-icon">LP</div>
                 <span className="brand-title">LPUtility</span>
               </div>

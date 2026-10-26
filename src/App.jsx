@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
-import { TelemetryWorkspace } from './modules/telemetry/TelemetryWorkspace';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { BufferbloatWorkspace } from './modules/bufferbloat/BufferbloatWorkspace';
 import { CapabilityCatalog } from './modules/catalog/CapabilityCatalog';
 import { IPv4Suite } from './modules/networking/IPv4Suite';
 import { IPv6Suite } from './modules/networking/IPv6Suite';
@@ -9,13 +10,9 @@ import { PasswordSuite } from './modules/security/PasswordSuite';
 import { TelemetryHistory } from './modules/history/TelemetryHistory';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('diagnostics');
+  const [activeTab, setActiveTab] = useState('bufferbloat');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Diagnostic parameters passed from tools catalog
-  const [target, setTarget] = useState('1.1.1.1');
-  const [measurementType, setMeasurementType] = useState('ping');
 
   // Enforce dark theme
   useEffect(() => {
@@ -23,20 +20,11 @@ export function App() {
   }, []);
 
   const handleSelectCapability = (cap) => {
-    if (cap.actionType === 'telemetry') {
-      setTarget(cap.defaultTarget || '1.1.1.1');
-      setMeasurementType(cap.measurementType || 'ping');
-      setActiveTab('diagnostics');
-    } else if (cap.targetTab) {
+    if (cap?.targetTab) {
       setActiveTab(cap.targetTab);
+    } else {
+      setActiveTab('bufferbloat');
     }
-    setIsMobileMenuOpen(false);
-  };
-
-  const handleRerun = (newTarget, newType) => {
-    setTarget(newTarget);
-    setMeasurementType(newType);
-    setActiveTab('diagnostics');
     setIsMobileMenuOpen(false);
   };
 
@@ -63,38 +51,40 @@ export function App() {
           closeMobileMenu={() => setIsMobileMenuOpen(false)}
         />
 
-        {/* Main Content */}
+        {/* Main Content with Error Boundary */}
         <main className="main-content">
-          {activeTab === 'diagnostics' && (
-            <TelemetryWorkspace 
-              initialTarget={target}
-              initialType={measurementType}
-            />
-          )}
+          <ErrorBoundary onReset={() => setActiveTab('bufferbloat')}>
+            {activeTab === 'bufferbloat' && (
+              <BufferbloatWorkspace 
+                onNavigateHistory={() => setActiveTab('history')}
+              />
+            )}
 
-          {activeTab === 'tools' && (
-            <CapabilityCatalog 
-              onSelectCapability={handleSelectCapability}
-            />
-          )}
+            {activeTab === 'tools' && (
+              <CapabilityCatalog 
+                onSelectCapability={handleSelectCapability}
+              />
+            )}
 
-          {activeTab === 'ipv4' && (
-            <IPv4Suite />
-          )}
+            {activeTab === 'ipv4' && (
+              <IPv4Suite />
+            )}
 
-          {activeTab === 'ipv6' && (
-            <IPv6Suite />
-          )}
+            {activeTab === 'ipv6' && (
+              <IPv6Suite />
+            )}
 
-          {activeTab === 'passwords' && (
-            <PasswordSuite />
-          )}
+            {activeTab === 'passwords' && (
+              <PasswordSuite />
+            )}
 
-          {activeTab === 'history' && (
-            <TelemetryHistory 
-              onRerun={handleRerun}
-            />
-          )}
+            {activeTab === 'history' && (
+              <TelemetryHistory 
+                onStartBufferbloat={() => setActiveTab('bufferbloat')}
+                onRerun={() => setActiveTab('bufferbloat')}
+              />
+            )}
+          </ErrorBoundary>
         </main>
       </div>
     </div>
