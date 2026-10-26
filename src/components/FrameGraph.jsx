@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 /**
  * High-performance real-time Frame Graph component
  * Renders an oscilloscope-style latency/frametime curve updating every 5ms
- * Inspired by modern telemetry / system metrics dashboards.
+ * Inspired by modern telemetry / system metrics dashboards (Image 2).
  */
 export function FrameGraph({
   latency = 152,
@@ -23,13 +23,13 @@ export function FrameGraph({
   const currentValRef = useRef(latency);
   const animationFrameIdRef = useRef(null);
   const timerIdRef = useRef(null);
-  const spikeCounterRef = useRef(0);
+  const tickRef = useRef(0);
   const [dimensions, setDimensions] = useState({ width: 600, height });
   const [hoverInfo, setHoverInfo] = useState(null);
 
   // Sync target latency
   useEffect(() => {
-    targetLatencyRef.current = latency || 145;
+    targetLatencyRef.current = latency || 152;
   }, [latency]);
 
   // Handle container resizing
@@ -51,25 +51,35 @@ export function FrameGraph({
     return () => observer.disconnect();
   }, [height, isMini]);
 
-  // Initialize data buffer
+  // Seed realistic baseline with organic peaks matching Image 2
   useEffect(() => {
     const pointCount = isMini ? 60 : 120;
-    const base = latency || 150;
+    const base = latency || 152;
     const initial = [];
 
+    // Distinct spikes pattern mirroring Image 2's oscilloscope spikes
+    const spikeIndices = isMini 
+      ? [12, 28, 45] 
+      : [8, 16, 27, 39, 48, 59, 72, 85, 96, 108, 114];
+
     for (let i = 0; i < pointCount; i++) {
-      // Natural initial distribution matching system metrics
-      let val = base + (Math.sin(i * 0.35) * 6) + ((Math.random() - 0.5) * 8);
-      // Occasional spikes mirroring realistic internet telemetry
-      if (i === 18 || i === 42 || i === 75 || i === 98 || i === 112) {
-        val += 50 + Math.random() * 60;
+      // Natural ripple wave
+      let val = base + Math.sin(i * 0.45) * 5 + Math.cos(i * 0.8) * 4;
+      
+      // Add natural spikes
+      if (spikeIndices.includes(i)) {
+        const spikeHeight = (i === 85 || i === 108) ? 95 : (50 + (i % 3) * 20);
+        val += spikeHeight;
+      } else {
+        val += ((i % 5) - 2) * 2;
       }
+
       initial.push(Math.max(10, Math.round(val)));
     }
 
     pointsRef.current = initial;
     currentValRef.current = initial[initial.length - 1];
-  }, [isMini]);
+  }, [latency, isMini]);
 
   // 5ms High-frequency tick loop
   useEffect(() => {
@@ -77,32 +87,35 @@ export function FrameGraph({
     let isDirty = true;
 
     timerIdRef.current = setInterval(() => {
-      spikeCounterRef.current += 1;
-      const target = targetLatencyRef.current || 150;
+      tickRef.current += 1;
+      const target = targetLatencyRef.current || 152;
       const cur = currentValRef.current;
 
-      // Smooth interpolation towards target with microsecond jitter
-      const drift = (target - cur) * 0.08;
-      const jitter = (Math.random() - 0.495) * 3.5;
-      
-      let nextVal = cur + drift + jitter;
+      // Micro-jitter calculation for real-time oscilloscope effect
+      const drift = (target - cur) * 0.05;
+      const microJitter = (Math.random() - 0.495) * 3.2;
+      let nextVal = cur + drift + microJitter;
 
-      // Natural intermittent latency burst every ~500-800 ticks (~2.5 - 4s)
-      if (spikeCounterRef.current % 700 === 0) {
-        nextVal += 45 + Math.random() * 55;
-      } else if (spikeCounterRef.current % 320 === 0) {
-        nextVal += 20 + Math.random() * 30;
+      // Organic periodic spike matching Image 2
+      if (tickRef.current % 480 === 0) {
+        nextVal += 75 + Math.random() * 35;
+      } else if (tickRef.current % 180 === 0) {
+        nextVal += 35 + Math.random() * 25;
       }
 
-      nextVal = Math.max(5, Math.round(nextVal));
+      nextVal = Math.max(10, Math.round(nextVal));
       currentValRef.current = nextVal;
 
-      if (pointsRef.current.length > 0) {
+      // Scroll points every 12 ticks (~60ms) to maintain smooth visible waveform
+      if (tickRef.current % 12 === 0 && pointsRef.current.length > 0) {
         pointsRef.current.push(nextVal);
         pointsRef.current.shift();
+      } else if (pointsRef.current.length > 0) {
+        // Update leading edge in real-time every 5ms
+        pointsRef.current[pointsRef.current.length - 1] = nextVal;
       }
 
-      if (onLiveValue && spikeCounterRef.current % 10 === 0) {
+      if (onLiveValue && tickRef.current % 6 === 0) {
         onLiveValue(nextVal);
       }
 
@@ -153,17 +166,16 @@ export function FrameGraph({
     const plotW = w - padLeft - padRight;
     const plotH = h - padTop - padBottom;
 
-    // Calculate Y domain
-    const minVal = minY !== null ? minY : Math.min(...points);
-    const maxVal = maxY !== null ? maxY : Math.max(...points);
-
-    // Standardize to Image 2 grid values if in range
+    // Standardize to Image 2 grid values: [100, 150, 200, 250, 300]
     let yBottom = 100;
     let yTop = 300;
 
+    const maxVal = Math.max(...points);
+    const minVal = Math.min(...points);
+
     if (maxVal > 300 || minVal < 70) {
       yBottom = Math.max(0, Math.floor(minVal / 50) * 50);
-      yTop = Math.ceil(Math.max(maxVal * 1.15, yBottom + 100) / 50) * 50;
+      yTop = Math.ceil(Math.max(maxVal * 1.12, yBottom + 120) / 50) * 50;
     }
 
     const yRange = Math.max(50, yTop - yBottom);
@@ -178,11 +190,10 @@ export function FrameGraph({
       return padLeft + (index / (points.length - 1)) * plotW;
     };
 
-    // Draw horizontal grid lines & Y labels (only for master chart)
+    // Draw horizontal grid lines & Y labels (Matching Image 2)
     if (!isMini) {
-      const gridSteps = [100, 150, 200, 250, 300].filter(
-        v => v >= yBottom && v <= yTop
-      );
+      const standardSteps = [100, 150, 200, 250, 300];
+      const gridSteps = standardSteps.filter(v => v >= yBottom && v <= yTop);
       
       const stepsToDraw = gridSteps.length >= 3 
         ? gridSteps 
@@ -207,7 +218,7 @@ export function FrameGraph({
       });
       ctx.restore();
 
-      // Draw bottom X-axis time labels
+      // Draw bottom X-axis time labels (Matching Image 2)
       ctx.save();
       ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
       ctx.font = '500 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -259,7 +270,7 @@ export function FrameGraph({
     ctx.fillStyle = gradient;
     ctx.fill(fillPath);
 
-    // Stroke the smooth curve
+    // Stroke the smooth curve (Matching Image 2's blue/indigo stroke)
     ctx.strokeStyle = accentColor;
     ctx.lineWidth = isMini ? 1.5 : 2.2;
     ctx.lineCap = 'round';
@@ -269,35 +280,31 @@ export function FrameGraph({
     ctx.stroke();
     ctx.restore();
 
-    // Draw hover cursor and indicator if hovered
-    if (!isMini && hoverInfo && hoverInfo.index >= 0 && hoverInfo.index < coords.length) {
-      const targetPoint = coords[hoverInfo.index];
+    // Default or Hovered Indicator (Matching Image 2)
+    if (!isMini) {
+      // If hovered, use hover point; otherwise default to an iconic spike point (e.g. index 27)
+      const targetIndex = (hoverInfo && hoverInfo.index >= 0) ? hoverInfo.index : 27;
+      const targetPoint = coords[targetIndex];
 
-      ctx.save();
-      // Vertical cursor line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath();
-      ctx.moveTo(targetPoint.x, padTop);
-      ctx.lineTo(targetPoint.x, padTop + plotH);
-      ctx.stroke();
+      if (targetPoint) {
+        ctx.save();
+        // Outer translucent glow ring
+        ctx.fillStyle = hexToRgba(accentColor, 0.25);
+        ctx.beginPath();
+        ctx.arc(targetPoint.x, targetPoint.y, 8, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Outer glow circle
-      ctx.fillStyle = hexToRgba(accentColor, 0.25);
-      ctx.beginPath();
-      ctx.arc(targetPoint.x, targetPoint.y, 8, 0, Math.PI * 2);
-      ctx.fill();
+        // Inner solid dot
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(targetPoint.x, targetPoint.y, 4, 0, Math.PI * 2);
+        ctx.fill();
 
-      // Inner solid dot
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(targetPoint.x, targetPoint.y, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = accentColor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
     }
   };
 
@@ -334,6 +341,14 @@ export function FrameGraph({
     setHoverInfo(null);
   };
 
+  // Tooltip position & text: Hovered point or default spike pill like Image 2
+  const activeTooltip = hoverInfo || {
+    x: dimensions.width * 0.24,
+    y: dimensions.height * 0.42,
+    value: pointsRef.current[27] || 154,
+    time: 'Monday, Oct 26, 23:55',
+  };
+
   return (
     <div 
       ref={containerRef} 
@@ -353,19 +368,19 @@ export function FrameGraph({
       />
 
       {/* Floating Tooltip Pill (Matching Image 2) */}
-      {!isMini && hoverInfo && (
+      {!isMini && (
         <div 
           className="graph-hover-tooltip"
           style={{
             position: 'absolute',
-            left: `${Math.min(Math.max(10, hoverInfo.x - 90), dimensions.width - 210)}px`,
-            top: `${Math.max(6, hoverInfo.y - 48)}px`,
+            left: `${Math.min(Math.max(12, activeTooltip.x - 70), dimensions.width - 230)}px`,
+            top: `${Math.max(8, activeTooltip.y - 46)}px`,
             pointerEvents: 'none',
           }}
         >
-          <span className="tooltip-time">{hoverInfo.time}</span>
+          <span className="tooltip-time">{activeTooltip.time}</span>
           <span className="tooltip-dot" style={{ background: accentColor }} />
-          <span className="tooltip-value font-mono font-bold">{hoverInfo.value} ms</span>
+          <span className="tooltip-value font-mono font-bold">{activeTooltip.value} ms</span>
         </div>
       )}
     </div>
@@ -403,7 +418,6 @@ function getTooltipTimestamp(range, index, total) {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Calculate simulated relative time
   const totalMinutes = range === 'Week' ? 7 * 24 * 60 : (range === 'Month' ? 30 * 24 * 60 : 24 * 60);
   const offsetMinutes = Math.round(((total - 1 - index) / total) * totalMinutes);
   const pointTime = new Date(now.getTime() - offsetMinutes * 60000);
@@ -414,6 +428,6 @@ function getTooltipTimestamp(range, index, total) {
   const hh = String(pointTime.getHours()).padStart(2, '0');
   const mm = String(pointTime.getMinutes()).padStart(2, '0');
 
-  // Format: "Monday, Oct 26, 23:55"
+  // Format: "Monday, Oct 26, 23:55" (Matching Image 2)
   return `${dayName}, ${monthName} ${dateNum}, ${hh}:${mm}`;
 }
