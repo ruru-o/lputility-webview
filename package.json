@@ -25,6 +25,7 @@
   "author": "LPUtility Team",
   "license": "MIT",
   "dependencies": {
+    "@cloudflare/speedtest": "^1.15.0",
     "lucide-react": "^1.16.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
