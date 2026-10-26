@@ -24,9 +24,10 @@ export function FrameGraph({
   maxY = null,
   timeRange = 'Day',
   isMini = false,
-  height = 240,
+  height = 210,
   accentColor = '#6366f1',
   onLiveValue = null,
+  onHoverPoint = null,
   interactive = true,
 }) {
   const containerRef = useRef(null);
@@ -74,13 +75,13 @@ export function FrameGraph({
 
   // Seed authentic baseline reflecting real network endpoint characteristics
   useEffect(() => {
-    const pointCount = isMini ? 60 : 120;
+    // 220 points in master graph creates dense, high-frequency ripples like Image 2!
+    const pointCount = isMini ? 60 : 220;
     const base = latency || 152;
     const initial = [];
     const hash = hashString(endpointId);
 
-    // Profile-based jitter and behavior
-    const isUltraFast = base <= 60;   // e.g. Cloudflare DoH (11ms), Google DoH (28ms)
+    const isUltraFast = base <= 50;   // e.g. Cloudflare DoH (11ms), Google DoH (28ms)
     const isModerate = base > 160 && base <= 350; // e.g. IPify (299ms)
     const isHighRTT = base > 350;     // e.g. RIPEstat (452ms), Globalping (409ms)
 
@@ -89,11 +90,10 @@ export function FrameGraph({
 
       if (isUltraFast) {
         // Ultra-stable DNS Anycast edge: tiny sub-millisecond ripple
-        val += Math.sin((i + hash % 10) * 0.3) * 1.5 + ((i % 4) - 1.5) * 0.8;
+        val += Math.sin((i + hash % 10) * 0.35) * 1.5 + ((i % 4) - 1.5) * 0.8;
       } else if (isHighRTT) {
         // High latency API / BGP routing queries: natural network transit variance
         val += Math.sin((i + hash % 17) * 0.4) * 14 + Math.cos(i * 0.7) * 9;
-        // Periodic query delta
         if ((i + (hash % 13)) % 22 === 0) {
           val += 25 + ((hash * i) % 35);
         }
@@ -101,17 +101,17 @@ export function FrameGraph({
         // Moderate latency API
         val += Math.sin((i + hash % 11) * 0.35) * 7 + Math.cos(i * 0.6) * 5;
         if ((i + (hash % 7)) % 19 === 0) {
-          val += 18 + ((hash * i) % 20);
+          val += 20 + ((hash * i) % 25);
         }
       } else {
         // Nominal (60-160ms, e.g. Cloudflare CDN)
         val += Math.sin((i + hash % 13) * 0.45) * 5 + Math.cos(i * 0.8) * 4;
-        if ((i + (hash % 9)) % 24 === 0) {
-          val += 35 + ((hash * i) % 30);
+        if ((i + (hash % 9)) % 18 === 0) {
+          val += 32 + ((hash * i) % 28);
         }
       }
 
-      initial.push(Math.max(5, Math.round(val)));
+      initial.push(Math.max(3, Math.round(val)));
     }
 
     pointsRef.current = initial;
@@ -129,19 +129,18 @@ export function FrameGraph({
       const target = targetLatencyRef.current || 152;
       const cur = currentValRef.current;
 
-      const isUltraFast = target <= 60;
+      const isUltraFast = target <= 50;
       const isHighRTT = target > 350;
 
-      // Endpoint-calibrated jitter magnitude
       const drift = (target - cur) * 0.06;
-      const jitterScale = isUltraFast ? 1.0 : (isHighRTT ? 4.5 : 2.5);
+      const jitterScale = isUltraFast ? 0.9 : (isHighRTT ? 4.0 : 2.2);
       const microJitter = (Math.random() - 0.495) * jitterScale;
       let nextVal = cur + drift + microJitter;
 
       // Realistic intermittent edge spike
       const spikeInterval = isUltraFast ? 800 : 360;
       if (tickRef.current % (spikeInterval + (hash % 80)) === 0) {
-        nextVal += isUltraFast ? 6 : (isHighRTT ? 40 : 25) + Math.random() * 20;
+        nextVal += isUltraFast ? 5 : (isHighRTT ? 35 : 22) + Math.random() * 18;
       }
 
       nextVal = Math.max(3, Math.round(nextVal));
@@ -163,7 +162,6 @@ export function FrameGraph({
       isDirtyRef.current = true;
     }, intervalMs);
 
-    // Render loop synced to animation frame
     const render = () => {
       if (isDirtyRef.current && canvasRef.current) {
         draw();
@@ -203,35 +201,52 @@ export function FrameGraph({
 
     const padLeft = isMini ? 4 : 20;
     const padRight = isMini ? 4 : 54;
-    const padTop = isMini ? 6 : 24;
-    const padBottom = isMini ? 6 : 38;
+    const padTop = isMini ? 6 : 20;
+    const padBottom = isMini ? 6 : 34;
 
     const plotW = w - padLeft - padRight;
     const plotH = h - padTop - padBottom;
 
-    // Y Domain calculation
+    // Adaptive Domain Calibration:
+    // Ensures baseline sits at ~30-40% height and spikes reach ~75-85%,
+    // eliminating squished/stretched floor distortion!
     let yBottom = 0;
     let yTop = 500;
+    let gridSteps = [100, 150, 200, 250, 300];
 
     if (isMini) {
       // Shared calibrated scale for mini cards:
-      // High latency (452ms) sits near top, 11ms sits near bottom!
       const currentMax = Math.max(...points);
       yTop = Math.max(500, Math.ceil(currentMax * 1.15 / 50) * 50);
       yBottom = 0;
     } else {
-      // Master Graph: Dynamic scale matching Image 2
       const target = targetLatencyRef.current || 152;
-      if (target <= 60) {
+      const currentMax = Math.max(...points);
+
+      if (target <= 50) {
         yBottom = 0;
-        yTop = 60;
-      } else if (target > 350) {
-        yBottom = 200;
-        yTop = Math.ceil(Math.max(600, target * 1.25) / 50) * 50;
-      } else {
-        // Default Image 2 scale: 100 - 300 ms
+        yTop = 50;
+        gridSteps = [10, 20, 30, 40, 50];
+      } else if (target <= 125) {
+        // e.g. Cloudflare CDN (95 - 105ms):
+        // 100ms baseline sits comfortably at 38% height, spikes reach 75%!
+        yBottom = 50;
+        yTop = 175;
+        gridSteps = [50, 75, 100, 125, 150, 175];
+      } else if (target <= 230) {
+        // Standard Image 2 scale: 100 - 300 ms!
         yBottom = 100;
         yTop = 300;
+        gridSteps = [100, 150, 200, 250, 300];
+      } else if (target <= 380) {
+        yBottom = 150;
+        yTop = 450;
+        gridSteps = [150, 225, 300, 375, 450];
+      } else {
+        // High RTT (e.g. 450ms)
+        yBottom = 200;
+        yTop = Math.max(600, Math.ceil(currentMax * 1.15 / 50) * 50);
+        gridSteps = [200, 300, 400, 500, yTop];
       }
     }
 
@@ -249,13 +264,6 @@ export function FrameGraph({
 
     // Draw horizontal grid lines & Y labels (Matching Image 2)
     if (!isMini) {
-      let gridSteps = [100, 150, 200, 250, 300];
-      if (yTop <= 60) {
-        gridSteps = [10, 20, 30, 40, 50, 60];
-      } else if (yTop > 350) {
-        gridSteps = [200, 300, 400, 500, yTop];
-      }
-
       const stepsToDraw = gridSteps.filter(v => v >= yBottom && v <= yTop);
 
       ctx.save();
@@ -289,7 +297,7 @@ export function FrameGraph({
 
       timeLabels.forEach((label, i) => {
         const x = padLeft + (i / (labelCount - 1)) * plotW;
-        ctx.fillText(label, x, h - 22);
+        ctx.fillText(label, x, h - 20);
       });
       ctx.restore();
     }
@@ -339,18 +347,30 @@ export function FrameGraph({
     ctx.stroke();
     ctx.restore();
 
-    // Default or Hovered Indicator (Matching Image 2)
-    if (!isMini) {
-      const targetIndex = (hoverInfo && hoverInfo.index >= 0) ? hoverInfo.index : 27;
-      const targetPoint = coords[targetIndex];
+    // Hover Indicator: ONLY drawn when user is hovering over the chart!
+    // No weird static dot in the middle of nowhere!
+    if (!isMini && hoverInfo && hoverInfo.index >= 0) {
+      const targetPoint = coords[hoverInfo.index];
 
       if (targetPoint) {
         ctx.save();
-        ctx.fillStyle = hexToRgba(activeColor, 0.25);
+        // Vertical dashed tracker line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(targetPoint.x, padTop);
+        ctx.lineTo(targetPoint.x, padTop + plotH);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Outer glow ring on the curve
+        ctx.fillStyle = hexToRgba(activeColor, 0.35);
         ctx.beginPath();
         ctx.arc(targetPoint.x, targetPoint.y, 8, 0, Math.PI * 2);
         ctx.fill();
 
+        // Inner solid dot on the curve
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(targetPoint.x, targetPoint.y, 4, 0, Math.PI * 2);
@@ -369,7 +389,6 @@ export function FrameGraph({
     if (isMini || !interactive || !canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
 
     const padLeft = 20;
     const padRight = 54;
@@ -381,31 +400,55 @@ export function FrameGraph({
       const index = Math.round(ratio * (points.length - 1));
       const val = points[index] || points[points.length - 1];
 
-      setHoverInfo({
-        x: mouseX,
-        y: mouseY,
+      // Exact pixel position on the curve
+      const ptX = padLeft + (index / (points.length - 1)) * plotW;
+      
+      const target = targetLatencyRef.current || 152;
+      let yBottom = 0;
+      let yTop = 500;
+      if (target <= 50) { yBottom = 0; yTop = 50; }
+      else if (target <= 125) { yBottom = 50; yTop = 175; }
+      else if (target <= 230) { yBottom = 100; yTop = 300; }
+      else if (target <= 380) { yBottom = 150; yTop = 450; }
+      else { yBottom = 200; yTop = Math.max(600, Math.ceil(Math.max(...points) * 1.15 / 50) * 50); }
+
+      const yRange = Math.max(30, yTop - yBottom);
+      const normalized = (val - yBottom) / yRange;
+      const clamped = Math.max(0, Math.min(1.05, normalized));
+      const padTop = 20;
+      const padBottom = 34;
+      const plotH = dimensions.height - padTop - padBottom;
+      const ptY = padTop + (plotH * (1 - clamped));
+
+      const timeStr = getTooltipTimestamp(timeRange, index, points.length);
+
+      const info = {
+        x: ptX,
+        y: ptY,
         index,
         value: val,
-        time: getTooltipTimestamp(timeRange, index, points.length),
-      });
+        time: timeStr,
+      };
+
+      setHoverInfo(info);
+      if (onHoverPoint) {
+        onHoverPoint(info);
+      }
       isDirtyRef.current = true;
     } else {
       setHoverInfo(null);
+      if (onHoverPoint) onHoverPoint(null);
       isDirtyRef.current = true;
     }
   };
 
   const handleMouseLeave = () => {
     setHoverInfo(null);
+    if (onHoverPoint) onHoverPoint(null);
     isDirtyRef.current = true;
   };
 
-  const activeTooltip = hoverInfo || {
-    x: dimensions.width * 0.24,
-    y: dimensions.height * 0.42,
-    value: pointsRef.current[27] || Math.round(latency),
-    time: 'Monday, Oct 26, 23:55',
-  };
+  const activeColor = accentColorRef.current || accentColor || '#6366f1';
 
   return (
     <div 
@@ -425,20 +468,22 @@ export function FrameGraph({
         onMouseLeave={handleMouseLeave}
       />
 
-      {/* Floating Tooltip Pill (Matching Image 2) */}
-      {!isMini && (
+      {/* Floating Tooltip: Physically anchored directly above the curve point! */}
+      {!isMini && hoverInfo && (
         <div 
-          className="graph-hover-tooltip"
+          className="graph-floating-tooltip"
           style={{
             position: 'absolute',
-            left: `${Math.min(Math.max(12, activeTooltip.x - 70), dimensions.width - 230)}px`,
-            top: `${Math.max(8, activeTooltip.y - 46)}px`,
+            left: `${Math.min(Math.max(70, hoverInfo.x), dimensions.width - 70)}px`,
+            top: `${Math.max(30, hoverInfo.y - 12)}px`,
+            transform: 'translate(-50%, -100%)',
             pointerEvents: 'none',
           }}
         >
-          <span className="tooltip-time">{activeTooltip.time}</span>
-          <span className="tooltip-dot" style={{ background: accentColorRef.current || accentColor }} />
-          <span className="tooltip-value font-mono font-bold">{activeTooltip.value} ms</span>
+          <span className="tooltip-time">{hoverInfo.time}</span>
+          <span className="tooltip-dot" style={{ background: activeColor }} />
+          <span className="tooltip-value font-mono font-bold">{hoverInfo.value} ms</span>
+          <div className="tooltip-arrow" />
         </div>
       )}
     </div>

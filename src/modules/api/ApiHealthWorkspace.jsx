@@ -35,6 +35,7 @@ export function ApiHealthWorkspace() {
   const [selectedApiId, setSelectedApiId] = useState('cloudflare-cdn');
   const [timeRange, setTimeRange] = useState('Day');
   const [liveFrametime, setLiveFrametime] = useState(103);
+  const [hoveredPoint, setHoveredPoint] = useState(null);
 
   const autoRefreshTimerRef = useRef(null);
 
@@ -175,14 +176,28 @@ export function ApiHealthWorkspace() {
           </div>
         </div>
 
+        {/* Docked Subhead Pill (Matching Image 2 directly below title) */}
+        <div className="graph-subhead-row">
+          <div className="graph-docked-pill">
+            <span className="tooltip-time">
+              {hoveredPoint ? hoveredPoint.time : `${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+            </span>
+            <span className="tooltip-dot" style={{ background: currentEndpointColor }} />
+            <span className="tooltip-value font-mono font-bold" style={{ color: currentEndpointColor }}>
+              {hoveredPoint ? `${hoveredPoint.value} ms` : `${liveFrametime || currentLiveStatus.frametime || 103} ms`}
+            </span>
+          </div>
+        </div>
+
         {/* Real-time Oscilloscope Frame Graph updating every 5ms */}
         <FrameGraph
           latency={currentLiveStatus.frametime || 103}
           endpointId={currentApiDef.id}
           timeRange={timeRange}
-          height={240}
+          height={205}
           accentColor={currentEndpointColor}
           onLiveValue={setLiveFrametime}
+          onHoverPoint={setHoveredPoint}
           interactive={true}
         />
       </div>
