@@ -3,6 +3,42 @@
    Calm Dark WinUI / Obsidian aesthetic
    ========================================================================== */
 
+/* Core Flex & Layout Utilities */
+.flex-row {
+  display: flex !important;
+  flex-direction: row;
+}
+
+.flex-col {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-baseline {
+  align-items: baseline;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+
 /* App Shell */
 .lputility-app-shell {
   display: flex;
@@ -1337,10 +1373,27 @@ input[type="range"] {
   min-width: 220px;
 }
 
+.wf-grade-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
 .wf-grade-title {
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  margin: 0 0 4px 0;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.wf-grade-pill {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid;
 }
 
 .wf-grade-desc {
@@ -1530,10 +1583,10 @@ input[type="range"] {
 }
 
 .wf-sqm-collapsible {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .wf-sqm-toggle-btn {
@@ -1541,40 +1594,191 @@ input[type="range"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 18px;
   background: transparent;
   border: none;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .wf-sqm-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.wf-sqm-content {
-  padding: 14px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.wf-sqm-steps {
+/* Router Bufferbloat Guide Styles */
+.wf-guide-body {
+  padding: 18px 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 10px 0;
-  padding-left: 18px;
+  gap: 20px;
 }
 
-.wf-doc-link {
+.wf-guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wf-guide-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.wf-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #38bdf8;
+  color: #04101d;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.wf-guide-intro {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.wf-guide-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.wf-guide-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wf-card-step {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
   color: #38bdf8;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  letter-spacing: 0.5px;
+}
+
+.wf-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.wf-card-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.wf-code-inline {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #38bdf8;
+}
+
+.wf-router-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.wf-router-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wf-router-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wf-router-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.wf-router-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-easiest {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-value {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.badge-pro {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.badge-gaming {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.wf-router-desc {
+  font-size: 0.79rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+  flex: 1;
+}
+
+.wf-router-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* ==========================================
@@ -1842,21 +2046,62 @@ input[type="range"] {
   border: 1px solid var(--border-card, rgba(255, 255, 255, 0.06));
 }
 
-.winui-select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-primary);
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  cursor: pointer;
-  outline: none;
+.vlsm-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
+.vlsm-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.vlsm-select-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.vlsm-select-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.vlsm-dropdown,
+.winui-select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  cursor: pointer;
+  outline: none;
+  min-width: 170px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.vlsm-dropdown:focus,
+.winui-select:focus {
+  border-color: #38bdf8;
+}
+
+.vlsm-dropdown option,
 .winui-select option {
   background: #111419;
   color: #ffffff;
+  padding: 6px 10px;
 }
 
 .wf-table-wrap {
@@ -1932,6 +2177,92 @@ input[type="range"] {
 
 .wf-matrix-toggle-btn:hover {
   color: var(--text-primary);
+}
+
+/* IPv6 Hextet Architecture Styles */
+.wf-hextet-card, .wf-ptr-card {
+  padding: 18px 20px;
+  border-radius: 10px;
+  background: var(--surface-card, rgba(13, 15, 20, 0.85));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.06));
+}
+
+.wf-hextet-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .wf-hextet-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .wf-hextet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.wf-hextet-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 6px;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.15s ease;
+  min-width: 0;
+}
+
+.wf-hextet-box.hextet-net {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+}
+
+.wf-hextet-box.hextet-host {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.wf-hextet-range {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-bottom: 6px;
+}
+
+.wf-hextet-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hextet-net .wf-hextet-val {
+  color: #38bdf8;
+}
+
+.hextet-host .wf-hextet-val {
+  color: #cbd5e1;
+}
+
+.wf-hextet-type {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.hextet-net .wf-hextet-type {
+  color: rgba(56, 189, 248, 0.9);
+}
+
+.hextet-host .wf-hextet-type {
+  color: var(--text-muted);
 }
 
 /* Password Generator Suite */

@@ -216,7 +216,7 @@ export function IPv6Suite() {
                   key={h.index} 
                   className={`wf-hextet-box ${h.isNetwork ? 'hextet-net' : 'hextet-host'}`}
                 >
-                  <span className="wf-hextet-range">Bits {h.startBit}–{h.endBit - 1}</span>
+                  <span className="wf-hextet-range">Bits {h.startBit} to {h.endBit - 1}</span>
                   <span className="wf-hextet-val font-mono">{h.hex}</span>
                   <span className="wf-hextet-type">{h.isNetwork ? 'Prefix' : 'Interface ID'}</span>
                 </div>

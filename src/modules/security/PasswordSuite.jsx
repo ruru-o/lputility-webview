@@ -3,9 +3,9 @@ import { Copy, Check, RefreshCw, KeyRound, ShieldCheck } from 'lucide-react';
 import { generateSecurePassword } from '../../utils/crypto';
 
 const SETS = [
-  { key: 'useLower', label: 'a–z', name: 'Lowercase' },
-  { key: 'useUpper', label: 'A–Z', name: 'Uppercase' },
-  { key: 'useNumbers', label: '0–9', name: 'Numbers' },
+  { key: 'useLower', label: 'a-z', name: 'Lowercase' },
+  { key: 'useUpper', label: 'A-Z', name: 'Uppercase' },
+  { key: 'useNumbers', label: '0-9', name: 'Numbers' },
   { key: 'useSymbols', label: '!@#', name: 'Symbols' },
 ];
 

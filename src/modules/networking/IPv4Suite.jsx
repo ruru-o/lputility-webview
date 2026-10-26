@@ -199,9 +199,9 @@ export function IPv4Suite() {
               <span className="wf-stat-k">Usable Host Range</span>
               <div className="wf-stat-v-row">
                 <span className="wf-stat-v font-mono text-success">
-                  {subnetResult.firstUsableHost} — {subnetResult.lastUsableHost}
+                  {subnetResult.firstUsableHost} to {subnetResult.lastUsableHost}
                 </span>
-                <button className="copy-mini-btn" onClick={() => copyVal('range', `${subnetResult.firstUsableHost} - ${subnetResult.lastUsableHost}`)}>
+                <button className="copy-mini-btn" onClick={() => copyVal('range', `${subnetResult.firstUsableHost} to ${subnetResult.lastUsableHost}`)}>
                   {copiedKey === 'range' ? <Check size={12} className="text-success" /> : <Copy size={12} />}
                 </button>
               </div>
@@ -305,16 +305,17 @@ export function IPv4Suite() {
           {/* VLSM Subnet Splitter */}
           {cidr < 30 && (
             <div className="winui-card wf-split-card">
-              <div className="flex-row items-center justify-between" style={{ marginBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
-                <div className="flex-row items-center gap-2">
+              <div className="vlsm-header-row">
+                <div className="vlsm-title-group">
                   <Split size={16} className="text-accent" />
                   <span className="wf-col-title">Subnet Partitioning (VLSM)</span>
                 </div>
 
-                <div className="flex-row items-center gap-2">
-                  <span className="text-xs text-muted">Partition into:</span>
+                <div className="vlsm-select-group">
+                  <label htmlFor="vlsm-select-input" className="vlsm-select-label">Partition into:</label>
                   <select 
-                    className="winui-select"
+                    id="vlsm-select-input"
+                    className="vlsm-dropdown"
                     value={targetSplitCidr}
                     onChange={(e) => setTargetSplitCidr(parseInt(e.target.value, 10))}
                   >
@@ -342,7 +343,7 @@ export function IPv4Suite() {
                       <tr key={idx}>
                         <td className="font-mono text-muted">{idx + 1}</td>
                         <td className="font-mono font-bold text-accent">{sub.networkAddress}/{targetSplitCidr}</td>
-                        <td className="font-mono">{sub.firstUsableHost} — {sub.lastUsableHost}</td>
+                        <td className="font-mono">{sub.firstUsableHost} to {sub.lastUsableHost}</td>
                         <td className="font-mono text-muted">{sub.broadcastAddress}</td>
                         <td className="font-mono text-success">{sub.usableHosts}</td>
                         <td style={{ textAlign: 'right' }}>

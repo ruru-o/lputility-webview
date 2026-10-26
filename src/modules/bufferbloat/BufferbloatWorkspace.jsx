@@ -40,6 +40,12 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
 
   useEffect(() => {
     isMountedRef.current = true;
+    if (typeof window !== 'undefined') {
+      window.__SET_MOCK_BUFFERBLOAT_RESULT = (mockRes) => {
+        setResult(mockRes);
+        setShowSqmHelp(true);
+      };
+    }
     return () => {
       isMountedRef.current = false;
       if (abortControllerRef.current) {
@@ -255,9 +261,21 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
               </div>
 
               <div className="wf-grade-text">
-                <h2 className="wf-grade-title" style={{ color: result.gradeDetails.color }}>
-                  Grade {result.grade} — {result.gradeDetails.title}
-                </h2>
+                <div className="wf-grade-title-row">
+                  <h2 className="wf-grade-title" style={{ color: result.gradeDetails.color }}>
+                    Grade {result.grade}
+                  </h2>
+                  <span 
+                    className="wf-grade-pill"
+                    style={{
+                      borderColor: `${result.gradeDetails.color}50`,
+                      color: result.gradeDetails.color,
+                      backgroundColor: `${result.gradeDetails.color}15`,
+                    }}
+                  >
+                    {result.gradeDetails.title}
+                  </span>
+                </div>
                 <p className="wf-grade-desc">
                   {result.gradeDetails.description}
                 </p>
@@ -344,22 +362,22 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
               <div className="wf-app-chip">
                 <Gamepad2 size={16} className="text-accent" />
                 <span className="wf-app-name">Gaming:</span>
-                {getRatingIcon(result.gradeDetails.ratings.gaming)}
-                <span className="wf-app-status">{result.gradeDetails.ratings.gaming}</span>
+                {getRatingIcon(result.gradeDetails?.ratings?.gaming || 'Good')}
+                <span className="wf-app-status">{result.gradeDetails?.ratings?.gaming || 'Good'}</span>
               </div>
 
               <div className="wf-app-chip">
                 <Video size={16} className="text-success" />
                 <span className="wf-app-name">Video Calls:</span>
-                {getRatingIcon(result.gradeDetails.ratings.voip)}
-                <span className="wf-app-status">{result.gradeDetails.ratings.voip}</span>
+                {getRatingIcon(result.gradeDetails?.ratings?.voip || 'Good')}
+                <span className="wf-app-status">{result.gradeDetails?.ratings?.voip || 'Good'}</span>
               </div>
 
               <div className="wf-app-chip">
                 <Tv size={16} className="text-warning" />
                 <span className="wf-app-name">Streaming:</span>
-                {getRatingIcon(result.gradeDetails.ratings.streaming)}
-                <span className="wf-app-status">{result.gradeDetails.ratings.streaming}</span>
+                {getRatingIcon(result.gradeDetails?.ratings?.streaming || 'Good')}
+                <span className="wf-app-status">{result.gradeDetails?.ratings?.streaming || 'Good'}</span>
               </div>
             </div>
 
@@ -383,33 +401,111 @@ export function BufferbloatWorkspace({ onNavigateHistory }) {
               </div>
             </div>
 
-            {/* Compact Collapsible SQM Advice */}
+            {/* Structured Router Bufferbloat Guide */}
             <div className="wf-sqm-collapsible">
               <button 
                 className="wf-sqm-toggle-btn"
                 onClick={() => setShowSqmHelp(!showSqmHelp)}
               >
                 <div className="flex-row items-center gap-2">
-                  <Sliders size={15} className="text-accent" />
-                  <span>How to fix bufferbloat on your router</span>
+                  <Sliders size={16} className="text-accent" />
+                  <span className="font-semibold">How to fix bufferbloat on your router</span>
                 </div>
-                {showSqmHelp ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                {showSqmHelp ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
 
               {showSqmHelp && (
-                <div className="wf-sqm-content font-sans">
-                  <div className="wf-sqm-pill-grid">
-                    <div className="wf-sqm-pill">
-                      <strong>1. Enable Smart Queue Management (SQM)</strong>
-                      <span>Turn on SQM / CAKE in OpenWrt, Asuswrt-Merlin, Ubiquiti UniFi, or eero settings.</span>
+                <div className="wf-guide-body font-sans">
+                  {/* Step 1: Quick Fix on Existing Router */}
+                  <div className="wf-guide-section">
+                    <h3 className="wf-guide-heading">
+                      <span className="wf-step-number">1</span>
+                      Quick Fix on Existing Router (Zero Cost)
+                    </h3>
+                    <p className="wf-guide-intro">
+                      Most modern routers have basic bandwidth control or QoS that immediately reduces queue bloat:
+                    </p>
+                    <div className="wf-guide-cards-grid">
+                      <div className="wf-guide-card">
+                        <span className="wf-card-step">Step A</span>
+                        <h4 className="wf-card-title">Open Router Admin</h4>
+                        <p className="wf-card-text">
+                          Open your browser and navigate to <code className="wf-code-inline">192.168.1.1</code> or <code className="wf-code-inline">192.168.0.1</code> to log into router settings.
+                        </p>
+                      </div>
+
+                      <div className="wf-guide-card">
+                        <span className="wf-card-step">Step B</span>
+                        <h4 className="wf-card-title">Set 90% Bandwidth Cap</h4>
+                        <p className="wf-card-text">
+                          Find QoS or Bandwidth Limiter. Set Download and Upload caps to 90% of your tested speeds. This prevents modem queue accumulation.
+                        </p>
+                      </div>
+
+                      <div className="wf-guide-card">
+                        <span className="wf-card-step">Step C</span>
+                        <h4 className="wf-card-title">Direct Cat6 Ethernet</h4>
+                        <p className="wf-card-text">
+                          Use a direct Ethernet cable for gaming or calls. Wi-Fi packet contention adds 15ms to 50ms of uncontrolled airtime jitter.
+                        </p>
+                      </div>
                     </div>
-                    <div className="wf-sqm-pill">
-                      <strong>2. Set Ingress & Egress Limits</strong>
-                      <span>Cap download and upload limits to 90–95% of your measured speed to keep router queues empty.</span>
-                    </div>
-                    <div className="wf-sqm-pill">
-                      <strong>3. Enjoy Low Ping</strong>
-                      <span>Eliminates gaming ping spikes while other devices download or stream 4K video.</span>
+                  </div>
+
+                  {/* Step 2: Routers with Built-in SQM */}
+                  <div className="wf-guide-section" style={{ marginTop: '12px' }}>
+                    <h3 className="wf-guide-heading">
+                      <span className="wf-step-number">2</span>
+                      Recommended Routers with Built-in SQM (CAKE / FQ-CoDel)
+                    </h3>
+                    <p className="wf-guide-intro">
+                      If your stock router lacks QoS, these routers provide native Smart Queue Management out of the box:
+                    </p>
+
+                    <div className="wf-router-grid">
+                      <div className="wf-router-card">
+                        <div className="wf-router-head">
+                          <span className="wf-router-name">eero 6+ / Pro 6E</span>
+                          <span className="wf-router-badge badge-easiest">Easiest App Setup</span>
+                        </div>
+                        <p className="wf-router-desc">
+                          1-tap toggle in the eero mobile app (eero Labs &gt; "Optimize for Conferencing and Gaming"). Zero configuration needed.
+                        </p>
+                        <div className="wf-router-meta">Whole-Home Mesh • Plug and Play</div>
+                      </div>
+
+                      <div className="wf-router-card">
+                        <div className="wf-router-head">
+                          <span className="wf-router-name">GL.iNet Flint 2 (GL-MT6000)</span>
+                          <span className="wf-router-badge badge-value">Best Value OpenWrt</span>
+                        </div>
+                        <p className="wf-router-desc">
+                          Ships pre-installed with OpenWrt and CAKE SQM toggle in the web dashboard. Easily handles up to 900 Mbps SQM throughput.
+                        </p>
+                        <div className="wf-router-meta">Dual 2.5G Ports • Wi-Fi 6 • ~$150</div>
+                      </div>
+
+                      <div className="wf-router-card">
+                        <div className="wf-router-head">
+                          <span className="wf-router-name">Ubiquiti UniFi Cloud Gateway Ultra</span>
+                          <span className="wf-router-badge badge-pro">Dedicated Gateway</span>
+                        </div>
+                        <p className="wf-router-desc">
+                          Compact gigabit gateway with built-in Smart Queues (FQ-CoDel). Connect between your modem and existing Wi-Fi APs.
+                        </p>
+                        <div className="wf-router-meta">Full 1 Gbps Routing • IDS/IPS • $129</div>
+                      </div>
+
+                      <div className="wf-router-card">
+                        <div className="wf-router-head">
+                          <span className="wf-router-name">ASUS RT-AX86U Pro</span>
+                          <span className="wf-router-badge badge-gaming">Pro Gaming</span>
+                        </div>
+                        <p className="wf-router-desc">
+                          High-performance router with Adaptive QoS. Can run Asuswrt-Merlin community firmware with Cake-qos script for line-rate queueing.
+                        </p>
+                        <div className="wf-router-meta">2.5G Port • Quad-Core CPU • Wi-Fi 6</div>
+                      </div>
                     </div>
                   </div>
                 </div>
