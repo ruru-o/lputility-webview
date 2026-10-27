@@ -21,6 +21,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Editor & OS files
+~$*
+*.tmp
 .vscode/*
 !.vscode/extensions.json
 .idea/
